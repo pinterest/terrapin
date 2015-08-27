@@ -1,0 +1,1 @@
+Terrapin is a distributed serving system, which facilitates serving huge key/value data sets generated from Hadoop jobs. Terrapin shards the data across multiple nodes and provides a highly available serving system.

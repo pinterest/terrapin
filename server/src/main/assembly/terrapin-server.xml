@@ -1,0 +1,47 @@
+<assembly>
+    <id>bin</id>
+    <baseDirectory/>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/scripts</directory>
+            <outputDirectory>scripts</outputDirectory>
+            <includes>
+                <include>run_*.sh</include>
+                <include>throttle_datanode.py</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/teletraan</directory>
+            <outputDirectory>teletraan</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>target</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>terrapin*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>../core/target/classes</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>*.properties</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+    <!-- use this section if you want to package dependencies -->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <useStrictFiltering>true</useStrictFiltering>
+            <useProjectArtifact>false</useProjectArtifact>
+            <scope>runtime</scope>
+        </dependencySet>
+    </dependencySets>
+</assembly>

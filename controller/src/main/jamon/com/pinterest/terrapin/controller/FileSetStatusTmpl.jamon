@@ -1,0 +1,79 @@
+<%args>
+    String clusterName;
+    String fileSet;
+    String rawJson;
+    String partitionMapJson;
+    List<Integer> missingPartitions;
+</%args>
+
+<%import>
+        java.util.List;
+</%import>
+
+        <?xml version="1.0" encoding="UTF-8" ?>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Fileset&nbsp;<% fileSet %>@<% clusterName %> Status</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css"
+          href="//netdna.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+    <style>
+        pre {
+            overflow: auto;
+            word-wrap: normal;
+            white-space: pre;
+            max-height: 600px;
+        }
+        .missing-partition {
+            padding-right: 4px;
+            padding-bottom: 4px;
+        }
+        .missing-partition .btn {
+            width: 80px;
+            cursor: default;
+            border-color: red
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <br/>
+            <a href="/status">&lt;&lt;&nbsp;Back To Cluster Page</a>
+        </div>
+        <div class="row">
+            <h3>Fileset:&nbsp;<% fileSet %>@<% clusterName %></h3>
+        </div>
+        <div class="row"><h4>Basic Information</h4></div>
+        <div class="row">
+            <pre><% rawJson %></pre>
+        </div>
+        <div class="row"><h4>Partition Map</h4></div>
+        <div class="row">
+            <pre><% partitionMapJson %></pre>
+        </div>
+        <div class="row"><h4>Missing Partitions</h4></div>
+        <div class="row">
+            <%if missingPartitions.size() == 0 %>
+                <div class="well" style="text-align: center;"><i>None</i></div>
+            <%else>
+                <table>
+                    <%for int i = 0; i < missingPartitions.size(); i+=10 %>
+                        <tr>
+                            <%for int j = 0; j < 10; j++ %>
+                                <td class="missing-partition">
+                                    <%if i + j < missingPartitions.size() %>
+                                        <div class="btn btn-default">
+                                            <% missingPartitions.get(i + j) %>
+                                        </div>
+                                    </%if>
+                                </td>
+                            </%for>
+                        </tr>
+                    </%for>
+                </table>
+            </%if>
+        </div>
+    </div>
+</body>
+</html>
