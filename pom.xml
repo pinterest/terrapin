@@ -20,36 +20,8 @@
 
     <repositories>
         <repository>
-            <id>pinrepo-snapshot</id>
-            <name>pinrepo-snapshot</name>
-            <url>https://mavenrepo.pinadmin.com/snapshot</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-        <repository>
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-        </repository>
-        <repository>
-            <id>pinrepo-release</id>
-            <name>pinrepo-release</name>
-            <url>https://mavenrepo.pinadmin.com/release</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>pinrepo-thirdparty</id>
-            <name>pinrepo-thirdparty</name>
-            <url>https://mavenrepo.pinadmin.com/thirdparty</url>
         </repository>
         <repository>
             <id>Twitter public Maven repo</id>
@@ -57,10 +29,6 @@
         </repository>
     </repositories>
     <pluginRepositories>
-        <pluginRepository>
-            <id>pinrepo-thirdparty</id>
-            <url>https://mavenrepo.pinadmin.com/thirdparty</url>
-        </pluginRepository>
         <pluginRepository>
             <id>Twitter public Maven repo</id>
             <url>http://maven.twttr.com</url>
@@ -74,37 +42,4 @@
         <module>controller</module>
         <module>server</module>
     </modules>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
-                <configuration>
-                    <retryFailedDeploymentCount>10</retryFailedDeploymentCount>
-                    <deployAtEnd>true</deployAtEnd>
-                </configuration>
-            </plugin>
-        </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.kuali.maven.wagons</groupId>
-                <artifactId>maven-s3-wagon</artifactId>
-                <version>1.2.1</version>
-            </extension>
-        </extensions>
-    </build>
-
-    <distributionManagement>
-        <repository>
-            <id>pinrepo-release</id>
-            <name>Internal S3 based Release Repository</name>
-            <url>s3://pinterest-maven-repo/release</url>
-        </repository>
-        <snapshotRepository>
-            <id>pinrepo-snapshot</id>
-            <name>Internal S3 based Snapshot Repository</name>
-            <url>s3://pinterest-maven-repo/snapshot</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
