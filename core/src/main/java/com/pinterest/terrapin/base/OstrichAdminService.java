@@ -29,13 +29,6 @@ public class OstrichAdminService {
   }
 
   public void start() {
-    try {
-      Properties properties = new Properties();
-      properties.load(this.getClass().getResource("build.properties").openStream());
-      LOG.info("build.properties build_revision: {}", properties.getProperty("build_revision", "unknown"));
-    } catch (Throwable t) {
-      LOG.error("Failed to load properties from build.properties", t);
-    }
     Duration[] defaultLatchIntervals = {Duration.apply(1, TimeUnit.MINUTES)};
     @SuppressWarnings("deprecation")
     AdminServiceFactory adminServiceFactory = new AdminServiceFactory(
