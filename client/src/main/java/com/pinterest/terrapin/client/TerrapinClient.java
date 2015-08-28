@@ -7,6 +7,7 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.pinterest.terrapin.Constants;
 import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.base.BytesUtil;
 import com.pinterest.terrapin.thrift.generated.MultiKey;
@@ -32,6 +33,7 @@ import com.twitter.util.Function;
 import com.twitter.util.Function0;
 import com.twitter.util.Future;
 import com.twitter.util.FuturePool;
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -60,24 +62,43 @@ public class TerrapinClient {
   private static final Logger LOG = LoggerFactory.getLogger(TerrapinClient.class);
 
   // Of the format, terrapin-client-<cluster_name>-
-  private final String statsPrefix;
-  private final FileSetViewManager fileSetViewManager;
+  private String statsPrefix;
+  private FileSetViewManager fileSetViewManager;
 
-  private final Cache<String, Pair<Service<ThriftClientRequest, byte[]>,
-                                   TerrapinServerInternal.ServiceIface>>
+  private Cache<String, Pair<Service<ThriftClientRequest, byte[]>,
+                             TerrapinServerInternal.ServiceIface>>
       thriftClientCache;
-  private final int targetPort;
-  private final int connectTimeoutMs;
-  private final int timeoutMs;
+  private int targetPort;
+  private int connectTimeoutMs;
+  private int timeoutMs;
 
   // Future pool establishing connections.
   private FuturePool connectionfuturePool;
+
+  public TerrapinClient(PropertiesConfiguration configuration,
+                        int targetPort,
+                        int connectTimeoutMs,
+                        int timeoutMs) throws Exception {
+    String zkQuorum = configuration.getString(Constants.ZOOKEEPER_QUORUM);
+    String clusterName = configuration.getString(Constants.HELIX_CLUSTER);
+    FileSetViewManager fileSetViewManager = new FileSetViewManager(
+        TerrapinUtil.getZooKeeperClient(zkQuorum, 30), clusterName);
+    init(fileSetViewManager, clusterName, targetPort, connectTimeoutMs, timeoutMs);
+  }
 
   public TerrapinClient(FileSetViewManager fileSetViewManager,
                         String clusterName,
                         int targetPort,
                         int connectTimeoutMs,
                         int timeoutMs) throws Exception {
+    init(fileSetViewManager, clusterName, targetPort, connectTimeoutMs, timeoutMs);
+  }
+
+  private void init(FileSetViewManager fileSetViewManager,
+                    String clusterName,
+                    int targetPort,
+                    int connectTimeoutMs,
+                    int timeoutMs) throws Exception {
     this.statsPrefix = "terrapin-client-" + clusterName + "-";
     this.fileSetViewManager = fileSetViewManager;
     this.thriftClientCache = CacheBuilder.newBuilder()
@@ -192,7 +213,7 @@ public class TerrapinClient {
    * @param retry Whether to perform a second try on the cluster.
    * @return A future wrapping a TerrapinResponse object.
    */
-  public Future<TerrapinResponse> getManyHelper(final String fileSet,
+  protected Future<TerrapinResponse> getManyHelper(final String fileSet,
                                                 final Set<ByteBuffer> keyList,
                                                 final boolean retry) {
     Pair<FileSetInfo, ViewInfo> pair = null;
@@ -305,7 +326,7 @@ public class TerrapinClient {
      * @param rpcPassNum The rpc pass we are on. The first pass is 1, second is 2 and so on.
      * @return A mapping from host name to a future wrapping a TerrapinResponse object.
      */
-  public Map<String, Future<TerrapinResponse>> getManyHelper(
+  protected Map<String, Future<TerrapinResponse>> getManyHelper(
       final String fileSet,
       String resource,
       int numPartitions,

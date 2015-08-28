@@ -69,7 +69,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase</artifactId>
+            <artifactId>hbase-hadoop2</artifactId>
             <version>0.94.7</version>
             <exclusions>
                 <exclusion>
