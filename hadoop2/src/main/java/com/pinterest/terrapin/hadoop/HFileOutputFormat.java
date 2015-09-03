@@ -1,5 +1,6 @@
 package com.pinterest.terrapin.hadoop;
 
+import com.pinterest.terrapin.Constants;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -50,10 +51,10 @@ public class HFileOutputFormat extends FileOutputFormat<BytesWritable, BytesWrit
     final Configuration conf = context.getConfiguration();
     final FileSystem fs = outputDir.getFileSystem(conf);
 
-    int blockSize = conf.getInt("hfile.blocksize", 16384);
+    int blockSize = conf.getInt(Constants.HFILE_BLOCKSIZE, 16384);
     // Default to snappy.
     Compression.Algorithm compressionAlgorithm = getAlgorithm(
-                conf.get("hfile.compression", "SNAPPY"));
+                conf.get(Constants.HFILE_COMPRESSION));
         final StoreFile.Writer writer = new StoreFile.WriterBuilder(conf, new CacheConfig(conf),
                 fs, blockSize).
                 withFilePath(new Path(outputPath, "part-"

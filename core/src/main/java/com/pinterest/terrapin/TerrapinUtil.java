@@ -26,6 +26,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DFSClient;
 import org.apache.hadoop.hdfs.protocol.DirectoryListing;
@@ -369,5 +370,18 @@ public class TerrapinUtil {
       marker = summaries.get(summaries.size() - 1).getKey();
     }
     return fileSizePairList;
+  }
+
+  public static void setupConfiguration(Configuration conf,
+                                        long dfsBlockSize,
+                                        int dfsReplication) {
+    conf.setInt("mapred.map.max.attempts", 10);
+    conf.setInt("io.bytes.per.checksum", 4096);
+    conf.setLong("dfs.block.size", dfsBlockSize);
+    conf.setInt("dfs.replication", dfsReplication);
+    conf.set(Constants.HFILE_COMPRESSION, System.getProperty(
+            Constants.HFILE_COMPRESSION, Constants.HFILE_COMPRESSION_DEFAULT));
+    conf.setInt(Constants.HFILE_BLOCKSIZE, Integer.parseInt(
+        System.getProperty(Constants.HFILE_BLOCKSIZE, "16384")));
   }
 }

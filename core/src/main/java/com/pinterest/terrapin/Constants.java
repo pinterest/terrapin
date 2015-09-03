@@ -79,4 +79,9 @@ public class Constants {
 
   // Default max size of a single HFile shard in bytes. Configured at 4G.
   public static final long DEFAULT_MAX_SHARD_SIZE_BYTES = 4L * 1024L * 1024L * 1024L;
+
+  // Configuration parameters for HFiles such as compression, block size etc.
+  public static final String HFILE_COMPRESSION = "hfile.compression";
+  public static final String HFILE_COMPRESSION_DEFAULT = "NONE";
+  public static final String HFILE_BLOCKSIZE = "hfile.blocksize";
 }
