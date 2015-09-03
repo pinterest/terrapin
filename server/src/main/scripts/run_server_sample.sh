@@ -6,23 +6,30 @@ BASE_DIR=/var
 JAVA_HOME=/usr
 JAVA=${JAVA_HOME}/bin/java
 
-LIB=${BASE_DIR}
+# CHANGE THESE TO POINT TO APPROPRIATE LOG DIRECTORY OR RUN DIRECTORY.
 LOG_DIR=${BASE_DIR}/log
 RUN_DIR=${BASE_DIR}/run
 PIDFILE=${RUN_DIR}/terrapin-server.pid
+
+# CHANGE THIS TO POINT TO LOCATION FOR NATIVE SNAPPY.SO FILE.
+JAVA_LIB_PATH=/usr/lib/hadoop/lib/native
+
+LIB=${BASE_DIR}
 CP=${LIB}:${LIB}/*:${LIB}/lib/*
 
-# TODO: set server memory based on available memory
-# or have this info in puppet.
-DAEMON_OPTS="-server -Xmx30000m -Xms30000m -XX:NewSize=512M -XX:MaxNewSize=512M \
+JVM_MEMORY=5G
+
+# YOUR CLUSTER PROPERTIES FILE HERE. MUST BE ON CLASSPATH.
+TERRAPIN_CONFIG=sample.properties
+DAEMON_OPTS="-server -Xmx${JVM_MEMORY} -Xms${JVM_MEMORY} -XX:NewSize=512M -XX:MaxNewSize=512M \
 -verbosegc -Xloggc:${LOG_DIR}/gc.log -XX:+UseGCLogFileRotation \
 -XX:NumberOfGCLogFiles=100 -XX:GCLogFileSize=2M -XX:+PrintGCDetails \
 -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintClassHistogram \
 -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+UseParNewGC \
 -XX:ParallelGCThreads=8 -XX:ConcGCThreads=4 -XX:ErrorFile=${LOG_DIR}/jvm_error.log \
--XX:CMSInitiatingOccupancyFraction=80 -cp ${CP} -Djava.library.path=/usr/lib/hadoop/lib/native \
+-XX:CMSInitiatingOccupancyFraction=80 -cp ${CP} -Djava.library.path=${JAVA_LIB_PATH} \
 -Dlog4j.configuration=log4j.server.properties \
--Dterrapin.config=sample.properties \
+-Dterrapin.config=${TERRAPIN_CONFIG} \
 -Djute.maxbuffer=10485760 \
 com.pinterest.terrapin.server.TerrapinServerMain"
 
