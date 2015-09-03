@@ -6,23 +6,27 @@ BASE_DIR=/var
 JAVA_HOME=/usr
 JAVA=${JAVA_HOME}/bin/java
 
-LIB=${BASE_DIR}
+# CHANGE THESE TO POINT TO APPROPRIATE LOG DIRECTORY OR RUN DIRECTORY.
 LOG_DIR=${BASE_DIR}/log
 RUN_DIR=${BASE_DIR}/run
 PIDFILE=${RUN_DIR}/terrapin-thrift.pid
+
+LIB=${BASE_DIR}
 CP=${LIB}:${LIB}/*:${LIB}/lib/*
 
-# TODO: set server memory based on available memory
-# or have this info in puppet.
-DAEMON_OPTS="-server -Xmx3000m -Xms3000m -XX:NewSize=512M -XX:MaxNewSize=512M \
+JVM_MEMORY=5G
+
+# YOUR THRIFT PROPERTIES FILE HERE. MUST BE ON CLASSPATH.
+TERRAPIN_CONFIG=sample.thrift.properties
+DAEMON_OPTS="-server -Xmx${JVM_MEMORY} -Xms${JVM_MEMORY} -XX:NewSize=512M -XX:MaxNewSize=512M \
 -verbosegc -Xloggc:${LOG_DIR}/gc.log -XX:+UseGCLogFileRotation \
 -XX:NumberOfGCLogFiles=100 -XX:GCLogFileSize=2M -XX:+PrintGCDetails \
 -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintClassHistogram \
 -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+UseParNewGC \
 -XX:ParallelGCThreads=8 -XX:ConcGCThreads=4 -XX:ErrorFile=${LOG_DIR}/jvm_error.log \
--XX:CMSInitiatingOccupancyFraction=80 -cp ${CP} -Djava.library.path=/usr/lib/hadoop/lib/native \
+-XX:CMSInitiatingOccupancyFraction=80 -cp ${CP} \
 -Dlog4j.configuration=log4j.thrift.properties \
--Dterrapin.config=sample.thrift.properties \
+-Dterrapin.config=${TERRAPIN_CONFIG} \
 com.pinterest.terrapin.thrift.TerrapinThriftMain"
 
 

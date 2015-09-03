@@ -6,19 +6,26 @@ BASE_DIR=/var
 JAVA_HOME=/usr
 JAVA=${JAVA_HOME}/bin/java
 
-LIB=${BASE_DIR}
+# CHANGE THESE TO POINT TO APPROPRIATE LOG DIRECTORY OR RUN DIRECTORY.
 LOG_DIR=${BASE_DIR}/log
 RUN_DIR=${BASE_DIR}/run
 PIDFILE=${RUN_DIR}/terrapin-controller.pid
+
+LIB=${BASE_DIR}
 CP=${LIB}:${LIB}/*:${LIB}/lib/*
 
-DAEMON_OPTS="-server -Xmx5G -Xms5G -XX:NewSize=512M -verbosegc -Xloggc:${LOG_DIR}/gc.log \
+JVM_MEMORY=2G
+
+# YOUR CLUSTER PROPERTIES FILE HERE. MUST BE ON CLASSPATH.
+TERRAPIN_CONFIG=sample.properties
+
+DAEMON_OPTS="-server -Xmx${JVM_MEMORY} -Xms${JVM_MEMORY} -XX:NewSize=512M -verbosegc -Xloggc:${LOG_DIR}/gc.log \
 -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=100 -XX:GCLogFileSize=2M \
 -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -XX:+PrintClassHistogram \
 -XX:+HeapDumpOnOutOfMemoryError -XX:+UseConcMarkSweepGC -XX:+UseParNewGC \
 -XX:ErrorFile=${LOG_DIR}/jvm_error.log -XX:CMSInitiatingOccupancyFraction=70 \
 -cp ${CP} -Dlog4j.configuration=log4j.controller.properties \
--Dterrapin.config=sample.properties \
+-Dterrapin.config=${TERRAPIN_CONFIG} \
 -Djute.maxbuffer=10485760 \
 com.pinterest.terrapin.controller.TerrapinControllerMain"
 
