@@ -175,23 +175,12 @@ public abstract class BaseUploader {
       distCpOptions.setSyncFolder(true);
       distCpOptions.setSkipCRC(true);
 
-      // set distcp.max.map.tasks from job conf if it exists. defaults to numShards otherwise.
-      conf.setInt("distcp.max.map.tasks", conf.getInt("distcp.max.map.tasks", numShards));
-
-      // Have a higher retry limit for tasks to copy data such as board joins.
-      conf.setInt("mapred.map.max.attempts", 10);
       if (maxSize > Constants.DEFAULT_MAX_SHARD_SIZE_BYTES) {
         LOG.warn("Largest shard is " + maxSize + " bytes. This is more than 4G. " +
                  "Increase the # of shards to reduce the size.");
         System.exit(1);
       }
-      conf.setInt("io.bytes.per.checksum", 4096);
-      // For some weird reason, if we do not set the block size to be the size of the largest size,
-      // data node cpu usage is 3 times more. The following trick seems to always work for files
-      // upto 1.5G in size.
-      maxSize = ((long)(maxSize / 4096) + 1) * 4096;
-      conf.setLong("dfs.block.size", maxSize);
-      conf.setInt("dfs.replication", replicationFactor);
+      TerrapinUtil.setupConfiguration(conf, maxSize, replicationFactor);
 
       DistCp distCp = new DistCp(conf, distCpOptions);
       Job job = distCp.execute();
