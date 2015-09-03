@@ -31,7 +31,6 @@ TERRAPIN_CLASSPATH=<Path to extracted maven assembly for hadoop2 module>
 HADOOP_CONF_PATH=<Path to hadoop configs such as core-site.xml/yarn-site.xml>
 HADOOP_HOME=<Path to hadoop home directory>
 CLASSPATH=$TERRAPIN_CLASS_PATH/terrapin-hadoop2-0.1-SNAPSHOT.jar:$TERRAPIN_CLASS_PATH/lib/*:$HADOOP_CONF_PATH:$HADOOP_HOME/share/hadoop/tools/lib/*
-TERRAPIN_CLASSPATH=<Path to extracted maven assembly for hadoop2 module>
 java -Dhfile.compression=NONE                \
      -Dterrapin.zk_quorum=hadoop1testnn:2181 \
      -Dterrapin.cluster=test                 \
