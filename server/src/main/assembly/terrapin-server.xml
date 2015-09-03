@@ -14,13 +14,6 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>src/main/teletraan</directory>
-            <outputDirectory>teletraan</outputDirectory>
-            <includes>
-                <include>*</include>
-            </includes>
-        </fileSet>
-        <fileSet>
             <directory>target</directory>
             <outputDirectory></outputDirectory>
             <includes>
