@@ -116,13 +116,13 @@ public class HFileGenerator {
    * @param outputFolder output folder for generated hfiles
    * @param partitionerType partitioner type
    * @param numOfPartitions number of partitions
-   * @param numOfKeysPerPartition number of keys per partitions
+   * @param numOfKeys number of keys
    * @return list of generated hfiles
    * @throws IOException if hfile creation goes wrong
    */
   public static List<Path> generateHFiles(FileSystem sourceFileSystem, Configuration conf,
                                           File outputFolder, PartitionerType partitionerType,
-                                          int numOfPartitions, int numOfKeysPerPartition)
+                                          int numOfPartitions, int numOfKeys)
       throws IOException {
     StoreFile.Writer[] writers = new StoreFile.Writer[numOfPartitions];
     for (int i = 0; i < numOfPartitions; i++) {
@@ -132,7 +132,7 @@ public class HFileGenerator {
           .build();
     }
     Partitioner partitioner = PartitionerFactory.getPartitioner(partitionerType);
-    for (int i = 0; i < numOfKeysPerPartition; i++) {
+    for (int i = 0; i < numOfKeys; i++) {
       byte[] key = String.format("%06d", i).getBytes();
       byte[] value;
       if (i <= 1) {

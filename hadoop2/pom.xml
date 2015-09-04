@@ -139,7 +139,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/main/assembly/terrapin-hadoop.xml</descriptor>
+                                <descriptor>src/main/assembly/terrapin-com.pinterest.terrapin.hadoop.xml</descriptor>
                             </descriptors>
                         </configuration>
                     </execution>
