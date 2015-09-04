@@ -3,13 +3,18 @@ package com.pinterest.terrapin.controller;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.apache.hadoop.fs.permission.FsPermission;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.HdfsFileStatus;
 import org.apache.helix.model.IdealState;
 import org.apache.helix.model.InstanceConfig;
 import org.apache.helix.model.builder.CustomModeISBuilder;
 import org.apache.helix.spectator.RoutingTableProvider;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.List;
 import java.util.Map;
@@ -20,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * Unit test for HdfsManager.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(HdfsFileStatus.class)
 public class HdfsManagerTest {
   class TestRoutingTableProvider extends RoutingTableProvider {
     private Map<String, List<InstanceConfig>> onlinePartitionMap;
@@ -46,21 +53,9 @@ public class HdfsManagerTest {
   }
 
   private HdfsFileStatus buildHdfsStatus(String path) {
-    return new HdfsFileStatus(10000,
-        false,
-        3,
-        10000,
-        System.currentTimeMillis(),
-        System.currentTimeMillis(),
-        FsPermission.getDefault(),
-        "root",
-        "supergroup",
-        null,
-        path.getBytes(),
-        0,
-        0,
-        null,
-        (byte)0);
+    HdfsFileStatus status = PowerMockito.mock(HdfsFileStatus.class);
+    Mockito.when(status.getLocalName()).thenReturn(new Path(path).getName());
+    return status;
   }
 
   @Test
