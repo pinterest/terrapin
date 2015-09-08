@@ -107,7 +107,7 @@ public class TerrapinUtilTest {
 
     // Invalid partition number.
     Assert.assertNull(
-            TerrapinUtil.getResourceAndPartitionNum("$terrapin$data$file_set$1343443323_1r0"));
+        TerrapinUtil.getResourceAndPartitionNum("$terrapin$data$file_set$1343443323_1r0"));
     Assert.assertNull(
         TerrapinUtil.getResourceAndPartitionNum("$terrapin$data$file_set$1343443323$1r0"));
 
@@ -186,9 +186,8 @@ public class TerrapinUtilTest {
     when(s3Client.listObjects(any(ListObjectsRequest.class))).thenReturn(objectListing);
     when(objectListing.getObjectSummaries()).thenReturn(summaries);
 
-    List<Pair<Path, Long>> results = TerrapinUtil.getS3FileList(
-        new AnonymousAWSCredentials(), "bucket", "/abc"
-    );
+    List<Pair<Path, Long>> results = TerrapinUtil.getS3FileList(new AnonymousAWSCredentials(),
+        "bucket", "/abc");
 
     assertEquals(2, results.size());
     assertTrue(results.get(0).getLeft().toString().endsWith(summary1.getKey()));
