@@ -1,6 +1,7 @@
 package com.pinterest.terrapin.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -27,15 +28,15 @@ public class TerrapinRoutingTableProviderTest {
     ExternalView ev2 = mock(ExternalView.class);
     ExternalView ev3 = mock(ExternalView.class);
 
-    when(ev1.getPartitionSet()).thenReturn(Sets.newHashSet("p1", "p2"));
-    when(ev2.getPartitionSet()).thenReturn(Sets.newHashSet("p2", "p3"));
-    when(ev3.getPartitionSet()).thenReturn(Sets.newHashSet("p1", "p3"));
-    when(ev1.getStateMap(eq("p1"))).thenReturn(ImmutableMap.of("p1", "ONLINE"));
-    when(ev1.getStateMap(eq("p2"))).thenReturn(ImmutableMap.of("p2", "ONLINE"));
-    when(ev2.getStateMap(eq("p2"))).thenReturn(ImmutableMap.of("p2", "ONLINE"));
-    when(ev2.getStateMap(eq("p3"))).thenReturn(ImmutableMap.of("p3", "ONLINE"));
-    when(ev3.getStateMap(eq("p1"))).thenReturn(ImmutableMap.of("p1", "ONLINE"));
-    when(ev3.getStateMap(eq("p3"))).thenReturn(ImmutableMap.of("p3", "ONLINE"));
+    when(ev1.getPartitionSet()).thenReturn(Sets.newHashSet("p$0", "p$1"));
+    when(ev2.getPartitionSet()).thenReturn(Sets.newHashSet("p$1", "p$2"));
+    when(ev3.getPartitionSet()).thenReturn(Sets.newHashSet("p$0", "p$2"));
+    when(ev1.getStateMap(eq("p$0"))).thenReturn(ImmutableMap.of("p$0", "ONLINE"));
+    when(ev1.getStateMap(eq("p$1"))).thenReturn(ImmutableMap.of("p$1", "ONLINE"));
+    when(ev2.getStateMap(eq("p$1"))).thenReturn(ImmutableMap.of("p$1", "ONLINE"));
+    when(ev2.getStateMap(eq("p$2"))).thenReturn(ImmutableMap.of("p$2", "ONLINE"));
+    when(ev3.getStateMap(eq("p$0"))).thenReturn(ImmutableMap.of("p$0", "ONLINE"));
+    when(ev3.getStateMap(eq("p$2"))).thenReturn(ImmutableMap.of("p$2", "ONLINE"));
     when(ev1.getResourceName()).thenReturn("r1");
     when(ev2.getResourceName()).thenReturn("r2");
     when(ev3.getResourceName()).thenReturn("r3");
@@ -48,14 +49,23 @@ public class TerrapinRoutingTableProviderTest {
 
     TerrapinRoutingTableProvider provider =
         new TerrapinRoutingTableProvider(zkManager, ImmutableList.of("r1", "r2"));
-    provider.updateExternalView(ImmutableList.of(ev2, ev3));
 
     Map<String, TerrapinRoutingTableProvider.ViewInfoRecord> viewInfoRecordMap =
         Whitebox.getInternalState(provider, "viewInfoRecordMap");
+    viewInfoRecordMap.get("r1").drained = true;
+    viewInfoRecordMap.get("r2").drained = true;
+
+    provider.updateExternalView(ImmutableList.of(ev2, ev3));
+
+    viewInfoRecordMap = Whitebox.getInternalState(provider, "viewInfoRecordMap");
 
     assertEquals(2, viewInfoRecordMap.size());
     assertTrue(viewInfoRecordMap.containsKey("r2"));
     assertTrue(viewInfoRecordMap.containsKey("r3"));
+    assertTrue(viewInfoRecordMap.get("r2").drained);
+    assertFalse(viewInfoRecordMap.get("r3").drained);
+    assertEquals(v2, viewInfoRecordMap.get("r2").viewInfo);
+    assertEquals(new ViewInfo(ev3), viewInfoRecordMap.get("r3").viewInfo);
 
     provider.shutdown();
   }

@@ -26,16 +26,14 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class ControllerUtilTest {
 
   @Test
-  @PrepareForTest({ControllerUtil.class, TerrapinUtil.class})
+  @PrepareForTest({ControllerUtil.class, TerrapinUtil.class, HdfsFileStatus.class})
   public void testBuildIdealStateForHdfsDir() throws Exception {
     PowerMockito.mockStatic(TerrapinUtil.class);
     String hdfsDir = "/terrapin/data/fileset";
 
     DFSClient dfsClient = mock(DFSClient.class);
-    HdfsFileStatus fileStatus1 = new HdfsFileStatus(1234l, false, 0, 0, 0, 0, null, null, null,
-        null, "part-00000".getBytes(), 0, 0, null, (byte)0);
-    HdfsFileStatus fileStatus2 = new HdfsFileStatus(5678l, false, 0, 0, 0, 0, null, null, null,
-        null, "part-00001".getBytes(), 0, 0, null, (byte)0);
+    HdfsFileStatus fileStatus1 = PowerMockito.mock(HdfsFileStatus.class);
+    HdfsFileStatus fileStatus2 = PowerMockito.mock(HdfsFileStatus.class);
     BlockLocation blockLocation1 = new BlockLocation(new String[]{"host1"},
         new String[]{"host1"}, 0, 0);
     BlockLocation blockLocation2 = new BlockLocation(new String[]{"host2"},
@@ -45,6 +43,12 @@ public class ControllerUtilTest {
     BlockLocation blockLocation4 = new BlockLocation(new String[]{"host3"},
         new String[]{"host1"}, 0, 0);
 
+    when(fileStatus1.getLocalName()).thenReturn("part-00000");
+    when(fileStatus2.getLocalName()).thenReturn("part-00001");
+    when(fileStatus1.getFullName(eq(hdfsDir))).thenReturn(hdfsDir + "/part-00000");
+    when(fileStatus2.getFullName(eq(hdfsDir))).thenReturn(hdfsDir + "/part-00001");
+    when(fileStatus1.getLen()).thenReturn(1234l);
+    when(fileStatus2.getLen()).thenReturn(5678l);
     when(TerrapinUtil.getHdfsFileList(any(DFSClient.class), eq(hdfsDir))).thenReturn(
         Lists.newArrayList(fileStatus1, fileStatus2)
     );
@@ -62,11 +66,13 @@ public class ControllerUtilTest {
     when(TerrapinUtil.getBucketSize(eq(2))).thenReturn(1);
 
     IdealState is = ControllerUtil.buildIdealStateForHdfsDir(dfsClient, hdfsDir, "resource",
-        PartitionerType.CASCADING, 100);
+        PartitionerType.CASCADING, 2);
 
     assertEquals(2, is.getNumPartitions());
     assertEquals("resource", is.getResourceName());
     assertEquals(Sets.newHashSet("host1"), is.getInstanceSet("resource_0"));
     assertEquals(Sets.newHashSet("host3"), is.getInstanceSet("resource_1"));
+    assertEquals("OnlineOffline", is.getStateModelDefRef());
+    assertEquals(IdealState.RebalanceMode.CUSTOMIZED, is.getRebalanceMode());
   }
 }

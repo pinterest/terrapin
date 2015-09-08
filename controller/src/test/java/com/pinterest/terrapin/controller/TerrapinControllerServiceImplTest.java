@@ -66,7 +66,8 @@ public class TerrapinControllerServiceImplTest {
     requestOptions.setNumVersionsToKeep(2);
     request.setOptions(requestOptions);
     FileSetInfo fileSetInfo = new FileSetInfo(
-        request.getFileSet(), request.getHdfsDirectory(), request.getExpectedNumPartitions(),
+        request.getFileSet(), "/terrapin/data/fileset/12345563434",
+        request.getExpectedNumPartitions(),
         Lists.newArrayList(mock(FileSetInfo.ServingInfo.class)), new Options()
     );
     String resourceName = TerrapinUtil.hdfsDirToHelixResource(request.getHdfsDirectory());
