@@ -70,7 +70,7 @@ public class ZooKeeperManagerTest {
   @Test
   public void testCreateClusterPaths() throws Exception {
     when(zk.create(anyString(), any(byte[].class), anyListOf(ACL.class), any(CreateMode.class)))
-      .thenReturn("");
+        .thenReturn("");
     ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
     zkManager.createClusterPaths();
 
@@ -87,7 +87,7 @@ public class ZooKeeperManagerTest {
   public void testRegisterWatchAllFileSets() throws Exception {
     PowerMockito.mockStatic(ZooKeeperMap.class);
     when(ZooKeeperMap.create(any(ZooKeeperClient.class), anyString(), any(Function.class)))
-      .thenReturn(null);
+        .thenReturn(null);
     ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
     zkManager.registerWatchAllFileSets();
     verifyStatic(times(2));
@@ -196,6 +196,9 @@ public class ZooKeeperManagerTest {
     when(viewInfo.toCompressedJson()).thenReturn(resourceData);
     when(viewInfo.hasOnlinePartitions()).thenReturn(false);
     zkManager.setViewInfo(viewInfo);
+    verify(zk, times(0)).create(anyString(), any(byte[].class),
+        anyListOf(ACL.class), any(CreateMode.class));
+    verify(zk, times(0)).setData(anyString(), any(byte[].class), anyInt());
   }
 
   @Test
@@ -274,5 +277,6 @@ public class ZooKeeperManagerTest {
     when(zk.setData(eq("/" + CLUSTER_NAME), eq(clusterInfo.toJson()), anyInt()))
         .thenReturn(new Stat());
     zkManager.setClusterInfo(clusterInfo);
+    verify(zk).setData(eq("/" + CLUSTER_NAME), eq(clusterInfo.toJson()), anyInt());
   }
 }
