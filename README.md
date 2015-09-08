@@ -28,7 +28,7 @@ but is required for using HFiles):
 
 ```
 mvn install:install-file \
-  -Dfile=thirdparty/hbase-hadp2-0.94.7.jar \
+  -Dfile=thirdparty/hbase-hadoop2-0.94.7.jar \
   -DgroupId=org.apache.hbase \
   -DartifactId=hbase-hadoop2 \
   -Dversion=0.94.7 \

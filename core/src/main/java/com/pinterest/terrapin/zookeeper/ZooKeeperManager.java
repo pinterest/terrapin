@@ -307,7 +307,7 @@ public class ZooKeeperManager {
           throw e;
         }
       }
-      if (!currentFileSetInfo.valid) {
+      if (currentFileSetInfo != null && !currentFileSetInfo.valid) {
         currentFileSetInfo = null;
       }
       if (lockedFileSetInfo != null || currentFileSetInfo != null) {

@@ -1,5 +1,6 @@
 package com.pinterest.terrapin.controller;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -24,7 +25,7 @@ import java.util.Set;
 public class TerrapinRoutingTableProvider extends RoutingTableProvider {
   private static final Logger LOG = LoggerFactory.getLogger(TerrapinRoutingTableProvider.class);
 
-  class ViewInfoRecord {
+  static class ViewInfoRecord {
     public ViewInfo viewInfo;
     public boolean drained;
   }
@@ -91,12 +92,8 @@ public class TerrapinRoutingTableProvider extends RoutingTableProvider {
     this.thread.start();
   }
 
-
-  @Override
-  public void onExternalViewChange(List<ExternalView> externalViewList,
-                                   NotificationContext context) {
-    super.onExternalViewChange(externalViewList, context);
-
+  @VisibleForTesting
+  public void updateExternalView(List<ExternalView> externalViewList) {
     Set<String> resourceSet = Sets.newHashSetWithExpectedSize(externalViewList.size());
     synchronized (viewInfoRecordMap) {
       for (ExternalView externalView : externalViewList) {
@@ -130,6 +127,13 @@ public class TerrapinRoutingTableProvider extends RoutingTableProvider {
         this.viewInfoRecordMap.remove(resource);
       }
     }
+  }
+
+  @Override
+  public void onExternalViewChange(List<ExternalView> externalViewList,
+                                   NotificationContext context) {
+    super.onExternalViewChange(externalViewList, context);
+    updateExternalView(externalViewList);
   }
 
   public void shutdown() {
