@@ -1,5 +1,6 @@
 package com.pinterest.terrapin.controller;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.pinterest.terrapin.Constants;
@@ -43,6 +44,7 @@ public class HdfsManager implements ControllerChangeListener {
   private final DFSClient hdfsClient;
   private final RoutingTableProvider routingTableProvider;
   private volatile boolean running;
+  private Rebalancer rebalancer;
   private Thread rebalancerThread;
 
   public HdfsManager(PropertiesConfiguration configuration,
@@ -69,10 +71,17 @@ public class HdfsManager implements ControllerChangeListener {
     }
     if (!this.running) {
       this.running = true;
-      this.rebalancerThread = new Thread(new Rebalancer());
+      this.rebalancer = new Rebalancer();
+      this.rebalancerThread = new Thread(rebalancer);
       this.rebalancerThread.setName("rebalancer-thread");
       this.rebalancerThread.start();
     }
+  }
+
+  @VisibleForTesting
+  Rebalancer createAndGetRebalancer() {
+    this.rebalancer = new Rebalancer();
+    return rebalancer;
   }
 
   static class VersionDirComparator implements Comparator<HdfsFileStatus> {
@@ -173,7 +182,7 @@ public class HdfsManager implements ControllerChangeListener {
         } else {
           CustomModeISBuilder offlineStateBuilder = new CustomModeISBuilder(resource);
           offlineStateBuilder.setStateModel("OnlineOffline");
-          offlineStateBuilder.setNumReplica(3);
+          offlineStateBuilder.setNumReplica(configuration.getInt(Constants.NUM_SERVING_REPLICAS, 3));
           offlineStateBuilder.setNumPartitions(fileSetInfo.servingInfo.numPartitions);
           IdealState offlinedState = offlineStateBuilder.build();
           offlinedState.setRebalanceMode(IdealState.RebalanceMode.CUSTOMIZED);
@@ -209,7 +218,7 @@ public class HdfsManager implements ControllerChangeListener {
       }
     }
 
-    private void reconcileAndRebalance() throws Exception {
+    void reconcileAndRebalance() throws Exception {
       // List all the filesets which are serving and get the list of current data sets
       // which are serving. List all the resources in helix and reconcile.
       List<String> resourceList = helixAdmin.getResourcesInCluster(clusterName);
@@ -330,7 +339,7 @@ public class HdfsManager implements ControllerChangeListener {
           LOG.warn("Exception in rebalancer loop.", e);
         }
         try {
-          Thread.sleep(configuration.getInt(Constants.REBALANCE_INTERVAL, 10) * 60 * 1000);
+          Thread.sleep(configuration.getInt(Constants.REBALANCE_INTERVAL_SECONDS, 600) * 1000);
         } catch (InterruptedException e) {
           LOG.info("Interrupted shutting down...");
           running = false;

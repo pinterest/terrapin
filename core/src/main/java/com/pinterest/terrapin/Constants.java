@@ -35,7 +35,7 @@ public class Constants {
   public static final String REBALANCE_DEVIATION_THRESHOLD = "rebalancer_deviation_threshold";
 
   // Interval at which the rebalancer and garbage collection thread runs.
-  public static final String REBALANCE_INTERVAL = "rebalance_interval";
+  public static final String REBALANCE_INTERVAL_SECONDS = "rebalance_interval_seconds";
 
   // Root directory where data is stored.
   public static final String HDFS_DATA_DIR = "/terrapin/data";
