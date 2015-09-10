@@ -153,7 +153,9 @@ public class HdfsManager implements ControllerChangeListener {
           hdfsDir,
           resource,
           fileSetInfo.servingInfo.partitionerType,
-          configuration.getInt(Constants.NUM_SERVING_REPLICAS, 3));
+          configuration.getInt(Constants.NUM_SERVING_REPLICAS, 3),
+          configuration.getBoolean(Constants.ENABLE_ZK_COMPRESSION,
+              Constants.ENABLE_ZK_COMPRESSION_DEFAULT));
 
       double deviation = calculateDeviationForResource(resource, idealState, routingTableProvider);
       if (deviation > configuration.getDouble(Constants.REBALANCE_DEVIATION_THRESHOLD, 0.0)) {
@@ -190,8 +192,10 @@ public class HdfsManager implements ControllerChangeListener {
         return true;
       } else {
         LOG.info("Offlining " + resourceDir);
+        boolean enableZkCompression = configuration.getBoolean(
+            Constants.ENABLE_ZK_COMPRESSION, Constants.ENABLE_ZK_COMPRESSION_DEFAULT);
         int bucketSize = TerrapinUtil.getBucketSize(
-            fileSetInfo.servingInfo.numPartitions);
+            fileSetInfo.servingInfo.numPartitions, enableZkCompression);
         if (bucketSize > 0) {
           LOG.info("Disabling resource " + resource);
           helixAdmin.enableResource(clusterName, resource, false);
@@ -202,6 +206,10 @@ public class HdfsManager implements ControllerChangeListener {
           offlineStateBuilder.setNumPartitions(fileSetInfo.servingInfo.numPartitions);
           IdealState offlinedState = offlineStateBuilder.build();
           offlinedState.setRebalanceMode(IdealState.RebalanceMode.CUSTOMIZED);
+          if (enableZkCompression) {
+            TerrapinUtil.compressIdealState(offlinedState);
+          }
+
           helixAdmin.setResourceIdealState(clusterName, resource, offlinedState);
         }
         return false;

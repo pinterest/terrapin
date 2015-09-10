@@ -53,6 +53,7 @@ public class ControllerUtil {
    * @param partitioner The partitioner type, used for extracting helix partition names from
    *                    HDFS files.
    * @param numReplicas The number of replicas for each partition.
+   * @param enableZkCompression Whether data in zk is kept compressed.
    * @return The ideal state as computed based on HDFS block placement.
    * @throws ControllerException
    */
@@ -60,7 +61,8 @@ public class ControllerUtil {
                                                      String hdfsDir,
                                                      String resourceName,
                                                      PartitionerType partitioner,
-                                                     int numReplicas)
+                                                     int numReplicas,
+                                                     boolean enableZkCompression)
       throws ControllerException {
     List<HdfsFileStatus> fileList;
     try {
@@ -100,7 +102,7 @@ public class ControllerUtil {
       hdfsBlockMapping.put(partitionName, instanceSet);
     }
     // Assign helix partitions for the resource - which is the HDFS directory.
-    int bucketSize = TerrapinUtil.getBucketSize(hdfsBlockMapping.size());
+    int bucketSize = TerrapinUtil.getBucketSize(hdfsBlockMapping.size(), enableZkCompression);
     CustomModeISBuilder idealStateBuilder = new CustomModeISBuilder(resourceName);
     for (Map.Entry<Integer, Set<String>> mapping : hdfsBlockMapping.entrySet()) {
       // Make partitions globally unique
@@ -125,6 +127,9 @@ public class ControllerUtil {
       is.setBucketSize(bucketSize);
     }
     is.setRebalanceMode(IdealState.RebalanceMode.CUSTOMIZED);
+    if (enableZkCompression) {
+      TerrapinUtil.compressIdealState(is);
+    }
     return is;
   }
 }

@@ -50,6 +50,7 @@ import org.apache.hadoop.hdfs.protocol.HdfsFileStatus;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.lib.partition.HashPartitioner;
+import org.apache.helix.model.IdealState;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,7 +166,11 @@ public class TerrapinUtil {
    * we change the logic here, we must make sure that the bucket size of pre existing
    * resources is not changed during rebalance operations.
    */
-  public static int getBucketSize(int numPartitions) {
+  public static int getBucketSize(int numPartitions, boolean enableZkCompression) {
+    // If compression is enabled, there is no need for bucketing of resources.
+    if (enableZkCompression) {
+      return 0;
+    }
     int numBuckets = (int)Math.ceil((double)numPartitions / 1000);
     if (numBuckets <= 1) {
       return 0;
@@ -248,6 +253,14 @@ public class TerrapinUtil {
       return 0;
     }
     return Integer.parseInt(viewPartitionName.substring(index + 1));
+  }
+
+  /**
+   * Sets the zk compression flag in the Helix ideal state. Compresses both the ideal
+   * state and the external view.
+   */
+  public static void compressIdealState(IdealState is) {
+    is.getRecord().setBooleanField("enableCompression", true);
   }
 
   /**

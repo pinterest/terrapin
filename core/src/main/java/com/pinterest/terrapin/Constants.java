@@ -101,4 +101,8 @@ public class Constants {
   public static final String HFILE_COMPRESSION = "hfile.compression";
   public static final String HFILE_COMPRESSION_DEFAULT = "NONE";
   public static final String HFILE_BLOCKSIZE = "hfile.blocksize";
+
+  // Whether cluster state kept in ZK is gzip compressed by Helix.
+  public static final String ENABLE_ZK_COMPRESSION = "enable_zk_compression";
+  public static final boolean ENABLE_ZK_COMPRESSION_DEFAULT = false;
 }
