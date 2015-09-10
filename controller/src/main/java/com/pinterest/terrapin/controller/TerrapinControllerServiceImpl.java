@@ -208,9 +208,4 @@ public class TerrapinControllerServiceImpl implements TerrapinController.Service
       }
     });
   }
-
-  @Override
-  public Future<Void> deleteFileSet(final TerrapinDeleteRequest request) {
-    return null;
-  }
 }
