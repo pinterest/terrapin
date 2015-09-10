@@ -97,10 +97,16 @@ public class TerrapinUtilTest {
 
   @Test
   public void testGetBucketSize() {
-    assertEquals(0, TerrapinUtil.getBucketSize(600));
-    assertEquals(701, TerrapinUtil.getBucketSize(1401));
-    assertEquals(1000, TerrapinUtil.getBucketSize(3000));
-    assertEquals(751, TerrapinUtil.getBucketSize(3001));
+    assertEquals(0, TerrapinUtil.getBucketSize(600, false));
+    assertEquals(701, TerrapinUtil.getBucketSize(1401, false));
+    assertEquals(1000, TerrapinUtil.getBucketSize(3000, false));
+    assertEquals(751, TerrapinUtil.getBucketSize(3001, false));
+
+
+    assertEquals(0, TerrapinUtil.getBucketSize(600, true));
+    assertEquals(0, TerrapinUtil.getBucketSize(1401, true));
+    assertEquals(0, TerrapinUtil.getBucketSize(3000, true));
+    assertEquals(0, TerrapinUtil.getBucketSize(3001, true));
   }
 
   @Test

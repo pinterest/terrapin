@@ -17,10 +17,7 @@
 package com.pinterest.terrapin.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -107,7 +104,8 @@ public class TerrapinControllerServiceImplTest {
     when(viewInfo2.getNumOnlinePartitions()).thenReturn(request.getExpectedNumPartitions());
     when(helixAdmin.getResourcesInCluster(CLUSTER)).thenReturn(new ArrayList<String>());
     when(ControllerUtil.buildIdealStateForHdfsDir(any(DFSClient.class),
-        anyString(), anyString(), any(PartitionerType.class), anyInt())).thenReturn(is);
+        anyString(), anyString(), any(PartitionerType.class), anyInt(), anyBoolean())).
+            thenReturn(is);
     doNothing().when(helixAdmin).addResource(eq(CLUSTER), eq(resourceName), eq(is));
     doNothing().when(helixAdmin).addResource(eq(CLUSTER), eq(resourceName),
         eq(is.getNumPartitions()), eq("OnlineOffline"), eq("CUSTOMIZED"), eq(is.getBucketSize()));

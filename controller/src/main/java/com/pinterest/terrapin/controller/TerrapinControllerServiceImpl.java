@@ -115,7 +115,9 @@ public class TerrapinControllerServiceImpl implements TerrapinController.Service
               hdfsDir,
               resourceName,
               request.getOptions().getPartitioner(),
-              configuration.getInt(Constants.NUM_SERVING_REPLICAS, 3));
+              configuration.getInt(Constants.NUM_SERVING_REPLICAS, 3),
+              configuration.getBoolean(Constants.ENABLE_ZK_COMPRESSION,
+                  Constants.ENABLE_ZK_COMPRESSION_DEFAULT));
           if (idealState.getNumPartitions() != request.getExpectedNumPartitions()) {
             throw new ControllerException(
                 "Partition count mismatch for hdfs dir " + hdfsDir +

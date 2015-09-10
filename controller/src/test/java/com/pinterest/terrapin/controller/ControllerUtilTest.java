@@ -17,12 +17,13 @@
 package com.pinterest.terrapin.controller;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
+import com.pinterest.terrapin.Constants;
 import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 
@@ -30,6 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.hdfs.DFSClient;
+import org.apache.hadoop.hdfs.protocol.DirectoryListing;
 import org.apache.hadoop.hdfs.protocol.HdfsFileStatus;
 import org.apache.helix.model.IdealState;
 import org.junit.Test;
@@ -38,57 +40,71 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.List;
+
 @RunWith(PowerMockRunner.class)
+@PrepareForTest({HdfsFileStatus.class})
 public class ControllerUtilTest {
 
-  @Test
-  @PrepareForTest({ControllerUtil.class, TerrapinUtil.class, HdfsFileStatus.class})
-  public void testBuildIdealStateForHdfsDir() throws Exception {
-    PowerMockito.mockStatic(TerrapinUtil.class);
-    String hdfsDir = "/terrapin/data/fileset";
-
+  public void testBuildIdealStateForHdfsDirHelper(boolean zkCompression,
+                                                  int numPartitions) throws Exception {
+    String hdfsDir = Constants.HDFS_DATA_DIR + "/fileset";
     DFSClient dfsClient = mock(DFSClient.class);
-    HdfsFileStatus fileStatus1 = PowerMockito.mock(HdfsFileStatus.class);
-    HdfsFileStatus fileStatus2 = PowerMockito.mock(HdfsFileStatus.class);
-    BlockLocation blockLocation1 = new BlockLocation(new String[]{"host1"},
-        new String[]{"host1"}, 0, 0);
-    BlockLocation blockLocation2 = new BlockLocation(new String[]{"host2"},
-        new String[]{"host2"}, 0, 0);
-    BlockLocation blockLocation3 = new BlockLocation(new String[]{"host1"},
-        new String[]{"host3"}, 0, 0);
-    BlockLocation blockLocation4 = new BlockLocation(new String[]{"host3"},
-        new String[]{"host1"}, 0, 0);
 
-    when(fileStatus1.getLocalName()).thenReturn("part-00000");
-    when(fileStatus2.getLocalName()).thenReturn("part-00001");
-    when(fileStatus1.getFullName(eq(hdfsDir))).thenReturn(hdfsDir + "/part-00000");
-    when(fileStatus2.getFullName(eq(hdfsDir))).thenReturn(hdfsDir + "/part-00001");
-    when(fileStatus1.getLen()).thenReturn(1234l);
-    when(fileStatus2.getLen()).thenReturn(5678l);
-    when(TerrapinUtil.getHdfsFileList(any(DFSClient.class), eq(hdfsDir))).thenReturn(
-        Lists.newArrayList(fileStatus1, fileStatus2)
-    );
-    when(dfsClient.getBlockLocations(eq(hdfsDir + "/part-00000"), anyInt(), eq(1234l)))
-        .thenReturn(new BlockLocation[]{blockLocation1, blockLocation2});
-    when(dfsClient.getBlockLocations(eq(hdfsDir + "/part-00001"), anyInt(), eq(5678l)))
-        .thenReturn(new BlockLocation[]{blockLocation3, blockLocation4});
-    when(TerrapinUtil.extractPartitionName(eq(fileStatus1.getLocalName()),
-        eq(PartitionerType.CASCADING))).thenReturn(0);
-    when(TerrapinUtil.extractPartitionName(eq(fileStatus2.getLocalName()),
-        eq(PartitionerType.CASCADING))).thenReturn(1);
-    when(TerrapinUtil.getHelixInstanceFromHDFSHost(eq("host1"))).thenReturn("host1");
-    when(TerrapinUtil.getHelixInstanceFromHDFSHost(eq("host2"))).thenReturn("host2");
-    when(TerrapinUtil.getHelixInstanceFromHDFSHost(eq("host3"))).thenReturn("host3");
-    when(TerrapinUtil.getBucketSize(eq(2))).thenReturn(1);
+    // Create three hosts in the clusters.
+    List<BlockLocation> locations = ImmutableList.of(
+            new BlockLocation(new String[]{"host1", "host2"},
+                              new String[]{"host1", "host2"}, 0, 0));
+    HdfsFileStatus[] fileStatuses = new HdfsFileStatus[numPartitions];
+    for (int i = 0; i < numPartitions; ++i) {
+      fileStatuses[i] = PowerMockito.mock(HdfsFileStatus.class);
+      String localName = String.format("part-%05d", i);
+      when(fileStatuses[i].getLocalName()).thenReturn(localName);
+      when(fileStatuses[i].getFullName(eq(hdfsDir))).thenReturn(hdfsDir + "/" + localName);
+      when(fileStatuses[i].getLen()).thenReturn(1000L);
+      BlockLocation[] locationArray = new BlockLocation[1];
+      locations.subList(0, 1).toArray(locationArray);
+      when(dfsClient.getBlockLocations(eq(fileStatuses[i].getFullName(hdfsDir)),
+          anyLong(), anyLong())).thenReturn(locationArray);
+    }
+
+
+    when(dfsClient.listPaths(eq(hdfsDir), any(byte[].class))).thenReturn(new DirectoryListing(
+        fileStatuses, 0));
 
     IdealState is = ControllerUtil.buildIdealStateForHdfsDir(dfsClient, hdfsDir, "resource",
-        PartitionerType.CASCADING, 2);
+        PartitionerType.CASCADING, 2, zkCompression);
 
-    assertEquals(2, is.getNumPartitions());
+    assertEquals(numPartitions, is.getNumPartitions());
     assertEquals("resource", is.getResourceName());
-    assertEquals(Sets.newHashSet("host1"), is.getInstanceSet("resource_0"));
-    assertEquals(Sets.newHashSet("host3"), is.getInstanceSet("resource_1"));
+    for (int i = 0; i < numPartitions; ++i) {
+      String partition;
+      if (numPartitions > 1000 && !zkCompression) {
+        partition = "resource_" + i;
+      } else {
+        partition = "resource$" + i;
+      }
+      assertEquals(Sets.newHashSet("host1", "host2"), is.getInstanceSet(partition));
+    }
     assertEquals("OnlineOffline", is.getStateModelDefRef());
+    if (zkCompression) {
+      assertTrue(is.getRecord().getBooleanField("enableCompression", false));
+    }
     assertEquals(IdealState.RebalanceMode.CUSTOMIZED, is.getRebalanceMode());
+  }
+
+  @Test
+  public void testBuildIdealStateForHdfsDirNoCompressionNoBucketing() throws Exception {
+    testBuildIdealStateForHdfsDirHelper(false, 500);
+  }
+
+  @Test
+  public void testBuildIdealStateForHdfsDirNoCompressionWithBucketing() throws Exception {
+    testBuildIdealStateForHdfsDirHelper(false, 1500);
+  }
+
+  @Test
+  public void testBuildIdealStateForHdfsDirWithCompression() throws Exception {
+    testBuildIdealStateForHdfsDirHelper(true, 1100);
   }
 }
