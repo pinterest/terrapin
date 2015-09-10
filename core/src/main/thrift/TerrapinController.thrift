@@ -72,21 +72,10 @@ struct TerrapinLoadRequest {
   4: optional Options options
 }
 
-struct TerrapinDeleteRequest {
-  1: required string fileSet
-}
-
 service TerrapinController {
   /**
    * Loads data already existing in an HDFS directory into serving.
    */
   void loadFileSet(1:TerrapinLoadRequest request)
-      throws (1:ControllerException e)
-
-  /**
-   * Removes a fileset from serving - this deletes all the versions associated
-   * with the file set.
-   */
-  void deleteFileSet(1:TerrapinDeleteRequest request)
       throws (1:ControllerException e)
 }
