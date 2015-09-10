@@ -23,7 +23,6 @@ import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.thrift.generated.ControllerErrorCode;
 import com.pinterest.terrapin.thrift.generated.ControllerException;
 import com.pinterest.terrapin.thrift.generated.TerrapinController;
-import com.pinterest.terrapin.thrift.generated.TerrapinDeleteRequest;
 import com.pinterest.terrapin.thrift.generated.TerrapinLoadRequest;
 import com.pinterest.terrapin.zookeeper.FileSetInfo;
 import com.pinterest.terrapin.zookeeper.ViewInfo;
