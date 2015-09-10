@@ -59,7 +59,7 @@ public class Constants {
 
   // HDFS replication.
   public static final String HDFS_REPLICATION = "hdfs_replication";
-  public static final int DEFAULT_HDFS_REPLICATION = 2;
+  public static final int DEFAULT_HDFS_REPLICATION = 3;
 
   // Number of serving replicas, default is 3 to match the HDFS replication factor.
   public static final String NUM_SERVING_REPLICAS = "num_serving_replicas";
