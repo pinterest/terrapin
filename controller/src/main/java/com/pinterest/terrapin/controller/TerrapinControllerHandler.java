@@ -178,6 +178,7 @@ public class TerrapinControllerHandler {
         zookeeperQuorum);
     this.spectatorManager.connect();
     this.routingTableProvider = new TerrapinRoutingTableProvider(zkManager, resourceList);
+    this.routingTableProvider.start();
     this.gaugeManager = new GaugeManager(zkManager, 
         Constants.GAUGE_MANAGER_EXEC_INTERVAL_SECONDS_DEFAULT);
     this.spectatorManager.addExternalViewChangeListener(this.routingTableProvider);

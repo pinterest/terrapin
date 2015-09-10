@@ -66,7 +66,5 @@ public class TerrapinRoutingTableProviderTest {
     assertFalse(viewInfoRecordMap.get("r3").drained);
     assertEquals(v2, viewInfoRecordMap.get("r2").viewInfo);
     assertEquals(new ViewInfo(ev3), viewInfoRecordMap.get("r3").viewInfo);
-
-    provider.shutdown();
   }
 }
