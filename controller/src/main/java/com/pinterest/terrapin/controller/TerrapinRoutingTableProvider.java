@@ -87,6 +87,9 @@ public class TerrapinRoutingTableProvider extends RoutingTableProvider {
         Stats.incr("compressed-view-init-errors");
       }
     }
+  }
+
+  public void start() {
     this.thread = new Thread(new ViewSyncRunnable());
     this.thread.setName("sync-external-view-thread");
     this.thread.start();
