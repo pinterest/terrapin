@@ -15,6 +15,7 @@ public class Constants {
 
   // Constants related to the thrift server (controller or server).
   public static final String THRIFT_PORT = "thrift_port";
+  public static final int DEFAULT_THRIFT_PORT = 9090;
   public static final String THRIFT_CONN_MAX_IDLE_TIME = "thrift_conn_max_idle_time";
   public static final String THRIFT_MAX_CONCURRENT_REQUESTS = "thrift_max_concurrent_requests";
 

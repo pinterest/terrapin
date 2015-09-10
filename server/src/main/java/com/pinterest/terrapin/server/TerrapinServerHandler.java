@@ -69,7 +69,7 @@ public class TerrapinServerHandler {
 
   public void start() throws Exception {
     String zookeeperQuorum = TerrapinUtil.getZKQuorumFromConf(configuration);
-    int thriftPort = configuration.getInt(Constants.THRIFT_PORT, 9090);
+    int thriftPort = configuration.getInt(Constants.THRIFT_PORT, Constants.DEFAULT_THRIFT_PORT);
 
     // Connect to Helix.
     this.helixManager = HelixManagerFactory.getZKHelixManager(
