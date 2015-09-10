@@ -54,7 +54,8 @@ public class TerrapinServiceImpl implements TerrapinService.ServiceIface {
         TerrapinClient terrapinClient = new TerrapinClient(
             fsViewManager,
             clusterName,
-            configuration.getInt(Constants.TERRAPIN_SERVER_TARGET_PORT, 9090),
+            configuration.getInt(Constants.TERRAPIN_SERVER_TARGET_PORT,
+                Constants.DEFAULT_THRIFT_PORT),
             configuration.getInt(Constants.CLIENT_CONNECT_TIMEOUT_MILLIS, 300),
             configuration.getInt(Constants.CLIENT_RPC_TIMEOUT_MILLIS, 500));
         clusterClientMap.put(clusterName, terrapinClient);

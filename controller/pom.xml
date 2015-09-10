@@ -48,6 +48,11 @@
             <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>com.pinterest.terrapin</groupId>
+            <artifactId>terrapin-client</artifactId>
+            <version>0.14</version>
+        </dependency>
+        <dependency>
             <groupId>org.jamon</groupId>
             <artifactId>jamon-runtime</artifactId>
             <version>2.4.1</version>

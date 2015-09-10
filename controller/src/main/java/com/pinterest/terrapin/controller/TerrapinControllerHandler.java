@@ -4,10 +4,14 @@ import com.google.common.collect.ImmutableSet;
 import com.pinterest.terrapin.Constants;
 import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.base.OstrichAdminService;
+import com.pinterest.terrapin.client.FileSetViewManager;
+import com.pinterest.terrapin.client.TerrapinClient;
 import com.pinterest.terrapin.thrift.generated.TerrapinController;
 import com.pinterest.terrapin.zookeeper.ClusterInfo;
 import com.pinterest.terrapin.zookeeper.ViewInfo;
 import com.pinterest.terrapin.zookeeper.ZooKeeperManager;
+
+import com.twitter.common.zookeeper.ZooKeeperClient;
 import com.twitter.finagle.builder.Server;
 import com.twitter.finagle.builder.ServerBuilder;
 import com.twitter.finagle.stats.OstrichStatsReceiver;
@@ -57,6 +61,8 @@ public class TerrapinControllerHandler {
   private GaugeManager gaugeManager;
   private HelixAdminWebApp webApp;
   private StatusServer statusServer;
+  // for querying a fileset from admin UI
+  private TerrapinClient sampleClient;
 
   public TerrapinControllerHandler(PropertiesConfiguration configuration) {
     this.configuration = configuration;
@@ -139,14 +145,18 @@ public class TerrapinControllerHandler {
         Constants.DEFAULT_HDFS_REPLICATION);
 
     // Start the zookeeper manager and watch filesets/compressed views.
-    this.zkManager = new ZooKeeperManager(TerrapinUtil.getZooKeeperClient(
-        zookeeperQuorum, 30),
-        this.clusterName);
+    ZooKeeperClient zkClient = TerrapinUtil.getZooKeeperClient(zookeeperQuorum, 30);
+    this.zkManager = new ZooKeeperManager(zkClient, this.clusterName);
     this.zkManager.createClusterPaths();
     this.zkManager.registerWatchAllFileSets();
     ClusterInfo clusterInfo = new ClusterInfo(namenode, hdfsReplicationFactor);
     // Set the HDFS replication factor and namenode address.
     this.zkManager.setClusterInfo(clusterInfo);
+
+    // Initialize a sample client instance
+    this.sampleClient = new TerrapinClient(new FileSetViewManager(zkClient, clusterName),
+        clusterName, configuration.getInt(Constants.THRIFT_PORT, Constants.DEFAULT_THRIFT_PORT),
+        1000, 1000);
 
     List<String> resourceList = this.helixAdmin.getResourcesInCluster(this.clusterName);
     reconcileViews(resourceList);
@@ -158,7 +168,7 @@ public class TerrapinControllerHandler {
     this.hdfsClient = new DFSClient(conf);
 
     LOG.info("Starting Helix against " + zookeeperQuorum);
-    int thriftPort = configuration.getInt(Constants.THRIFT_PORT, 9090);
+    int thriftPort = configuration.getInt(Constants.THRIFT_PORT, Constants.DEFAULT_THRIFT_PORT);
     String instanceName = InetAddress.getLocalHost().getHostName() + "_" + thriftPort;
 
     // Connect as spectator.
@@ -201,7 +211,7 @@ public class TerrapinControllerHandler {
         "status",
         configuration.getString(Constants.STATUS_SERVER_BINDING_ADDRESS, "0.0.0.0"),
         configuration.getInt(Constants.STATUS_SERVER_BINDING_PORT, 50030),
-        false, this.clusterName, this.zkManager, this.hdfsClient
+        false, this.clusterName, this.zkManager, this.hdfsClient, this.sampleClient
     );
     this.statusServer.start();
   }
