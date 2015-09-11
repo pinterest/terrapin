@@ -16,6 +16,7 @@
 */
 package com.pinterest.terrapin.hadoop;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.pinterest.terrapin.Constants;
@@ -37,12 +38,12 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.tools.DistCp;
-import org.apache.hadoop.tools.DistCpOptionSwitch;
 import org.apache.hadoop.tools.DistCpOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -56,6 +57,7 @@ public abstract class BaseUploader {
   private String terrapinNamenode;
 
   protected Configuration conf;
+  protected ZooKeeperManager zkManager;
 
   public BaseUploader(TerrapinUploaderOptions uploaderOptions) {
     this.terrapinZkQuorum = uploaderOptions.terrapinZkQuorum;
@@ -123,6 +125,22 @@ public abstract class BaseUploader {
     }
   }
 
+  @VisibleForTesting
+  protected ZooKeeperManager getZKManager(String clusterName) throws UnknownHostException {
+    return new ZooKeeperManager(TerrapinUtil.getZooKeeperClient(terrapinZkQuorum, 30), clusterName);
+  }
+
+  @VisibleForTesting
+  protected DistCp getDistCp(Configuration conf, DistCpOptions options) throws Exception {
+    return new DistCp(conf, options);
+  }
+
+  @VisibleForTesting
+  protected void loadFileSetData(ZooKeeperManager zkManager, FileSetInfo fileSetInfo,
+                                 Options options) throws Exception {
+    TerrapinUtil.loadFileSetData(zkManager, fileSetInfo, options);
+  }
+
   public void upload(String clusterName, String fileSet, Options options) throws Exception {
     List<Pair<Path, Long>> fileSizePairList = getFileList();
 
@@ -152,8 +170,7 @@ public abstract class BaseUploader {
     // Come up with a new timestamp epoch for the latest data.
     long timestampEpochMillis = System.currentTimeMillis();
     String hdfsDir = Constants.HDFS_DATA_DIR + "/" + fileSet + "/" + timestampEpochMillis;
-    ZooKeeperManager zkManager = new ZooKeeperManager(
-        TerrapinUtil.getZooKeeperClient(terrapinZkQuorum, 30), clusterName);
+    ZooKeeperManager zkManager = getZKManager(clusterName);
     FileSetInfo fileSetInfo = new FileSetInfo(fileSet,
         hdfsDir,
         numShards,
@@ -198,7 +215,7 @@ public abstract class BaseUploader {
       }
       TerrapinUtil.setupConfiguration(conf, maxSize, replicationFactor);
 
-      DistCp distCp = new DistCp(conf, distCpOptions);
+      DistCp distCp = getDistCp(conf, distCpOptions);
       Job job = distCp.execute();
       if (!job.waitForCompletion(true)) {
         throw new RuntimeException("Distributed copy failed.");
@@ -206,7 +223,7 @@ public abstract class BaseUploader {
 
       LOG.info("Successfully copied data.");
 
-      TerrapinUtil.loadFileSetData(zkManager, fileSetInfo, options);
+      loadFileSetData(zkManager, fileSetInfo, options);
 
       // Wait for a while so that zookeeper watches have propagated before relinquishing the lock.
       try {

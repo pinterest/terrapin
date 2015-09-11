@@ -101,8 +101,15 @@ public class Constants {
   public static final String HFILE_COMPRESSION = "hfile.compression";
   public static final String HFILE_COMPRESSION_DEFAULT = "NONE";
   public static final String HFILE_BLOCKSIZE = "hfile.blocksize";
+  public static final int HFILE_BLOCKSIZE_DEFAULT = 16384;
 
   // Whether cluster state kept in ZK is gzip compressed by Helix.
   public static final String ENABLE_ZK_COMPRESSION = "enable_zk_compression";
   public static final boolean ENABLE_ZK_COMPRESSION_DEFAULT = false;
+
+  // Maximum number of attempts for mapreduce mapper tasks
+  public static final int MAPRED_MAP_MAX_ATTEMPTS = 10;
+
+  // The number of bytes per checksum
+  public static final int CHECKSUM_BYTES = 4096;
 }
