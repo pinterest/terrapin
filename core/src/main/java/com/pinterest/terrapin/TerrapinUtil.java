@@ -404,13 +404,14 @@ public class TerrapinUtil {
   public static void setupConfiguration(Configuration conf,
                                         long dfsBlockSize,
                                         int dfsReplication) {
-    conf.setInt("mapred.map.max.attempts", 10);
-    conf.setInt("io.bytes.per.checksum", 4096);
+    conf.setInt("mapred.map.max.attempts", Constants.MAPRED_MAP_MAX_ATTEMPTS);
+    conf.setInt("io.bytes.per.checksum", Constants.CHECKSUM_BYTES);
     conf.setLong("dfs.block.size", dfsBlockSize);
     conf.setInt("dfs.replication", dfsReplication);
     conf.set(Constants.HFILE_COMPRESSION, System.getProperty(
             Constants.HFILE_COMPRESSION, Constants.HFILE_COMPRESSION_DEFAULT));
     conf.setInt(Constants.HFILE_BLOCKSIZE, Integer.parseInt(
-        System.getProperty(Constants.HFILE_BLOCKSIZE, "16384")));
+        System.getProperty(Constants.HFILE_BLOCKSIZE,
+            String.valueOf(Constants.HFILE_BLOCKSIZE_DEFAULT))));
   }
 }

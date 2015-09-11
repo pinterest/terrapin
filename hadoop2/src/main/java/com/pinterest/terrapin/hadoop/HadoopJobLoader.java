@@ -16,9 +16,11 @@
 */
 package com.pinterest.terrapin.hadoop;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.pinterest.terrapin.Constants;
 import com.pinterest.terrapin.TerrapinUtil;
+import com.pinterest.terrapin.thrift.generated.Options;
 import com.pinterest.terrapin.zookeeper.ClusterInfo;
 import com.pinterest.terrapin.zookeeper.FileSetInfo;
 import com.pinterest.terrapin.zookeeper.ZooKeeperManager;
@@ -30,6 +32,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.UnknownHostException;
 import java.util.List;
 
 /**
@@ -46,13 +49,29 @@ public class HadoopJobLoader {
     this.job = job;
   }
 
+  @VisibleForTesting
+  protected ZooKeeperManager getZKManager() throws UnknownHostException {
+    return new ZooKeeperManager(TerrapinUtil.getZooKeeperClient(options.terrapinZkQuorum, 30),
+        options.terrapinCluster);
+  }
+
+  @VisibleForTesting
+  protected void setOutputPath(String terrapinNameNode, String hdfsDir) {
+    FileOutputFormat.setOutputPath(job, new Path("hdfs", terrapinNameNode, hdfsDir));
+  }
+
+  @VisibleForTesting
+  protected void loadFileSetData(ZooKeeperManager zkManager, FileSetInfo fsInfo, Options options)
+      throws Exception {
+    TerrapinUtil.loadFileSetData(zkManager, fsInfo, options);
+  }
+
   public boolean waitForCompletion() throws Exception {
     // Come up with a new timestamp epoch for the latest data.
     long timestampEpochMillis = System.currentTimeMillis();
     String hdfsDir = Constants.HDFS_DATA_DIR + "/" + options.terrapinFileSet +
         "/" + timestampEpochMillis;
-    ZooKeeperManager zkManager = new ZooKeeperManager(
-        TerrapinUtil.getZooKeeperClient(options.terrapinZkQuorum, 30), options.terrapinCluster);
+    ZooKeeperManager zkManager = getZKManager();
     int numShards = job.getNumReduceTasks();
     FileSetInfo fileSetInfo = new FileSetInfo(options.terrapinFileSet,
         hdfsDir,
@@ -78,7 +97,7 @@ public class HadoopJobLoader {
     job.setOutputFormatClass(HFileOutputFormat.class);
     job.setOutputKeyClass(BytesWritable.class);
     job.setOutputValueClass(BytesWritable.class);
-    FileOutputFormat.setOutputPath(job, new Path("hdfs", terrapinNamenode, hdfsDir));
+    setOutputPath(terrapinNamenode, hdfsDir);
 
     zkManager.lockFileSet(options.terrapinFileSet, fileSetInfo);
 
@@ -92,7 +111,7 @@ public class HadoopJobLoader {
         LOG.error("MR job failed.");
         return false;
       }
-      TerrapinUtil.loadFileSetData(zkManager, fileSetInfo, options.loadOptions);
+      loadFileSetData(zkManager, fileSetInfo, options.loadOptions);
       // Wait for a while so that zookeeper watches have propagated before relinquishing the lock.
       try {
         LOG.info("Releasing file set lock.");
