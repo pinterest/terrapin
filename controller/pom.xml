@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.pinterest.terrapin</groupId>
             <artifactId>terrapin-client</artifactId>
-            <version>0.14</version>
+            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.jamon</groupId>

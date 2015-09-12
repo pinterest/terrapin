@@ -135,7 +135,11 @@ public class BaseUploaderTest {
           Integer.parseInt(conf.get("mapred.map.max.attempts")));
       assertEquals(Constants.CHECKSUM_BYTES,
           Integer.parseInt(conf.get("io.bytes.per.checksum")));
-      assertEquals(blockSize, Long.parseLong(conf.get("dfs.block.size")));
+      long blockSizeExpected = blockSize;
+      if (blockSizeExpected % Constants.CHECKSUM_BYTES != 0) {
+        blockSizeExpected = (blockSize / Constants.CHECKSUM_BYTES + 1) * Constants.CHECKSUM_BYTES;
+      }
+      assertEquals(blockSizeExpected, Long.parseLong(conf.get("dfs.block.size")));
       assertEquals(REPLICA_FACTOR, Integer.parseInt(conf.get("dfs.replication")));
       assertEquals(sourceFiles, options.getSourcePaths());
       assertTrue(options.shouldSkipCRC());

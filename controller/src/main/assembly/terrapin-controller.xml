@@ -24,6 +24,7 @@
             <outputDirectory>scripts</outputDirectory>
             <includes>
                 <include>run_*.sh</include>
+                <include>terrapin-admin.sh</include>
             </includes>
         </fileSet>
         <fileSet>
