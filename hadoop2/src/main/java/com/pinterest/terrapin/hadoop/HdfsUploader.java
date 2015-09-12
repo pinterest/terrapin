@@ -49,7 +49,7 @@ public class HdfsUploader extends BaseUploader {
     URI namenodeUri = new URI(
         hdfsPathTmp.toUri().getScheme(), hdfsPathTmp.toUri().getAuthority(), null, null);
     this.dfsClient = new DFSClient(namenodeUri, new Configuration());
-    this.hdfsDir = Path.getPathWithoutSchemeAndAuthority(hdfsPathTmp);
+    this.hdfsDir = new Path(hdfsPathTmp.toUri().getPath());
   }
 
   @Override

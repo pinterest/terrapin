@@ -38,6 +38,8 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <encoding>UTF-8</encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <hadoop.version>2.7.1</hadoop.version>
+        <hadoop.client.version>2.7.1</hadoop.client.version>
     </properties>
 
     <repositories>
@@ -56,6 +58,31 @@
             <url>https://maven.twttr.com</url>
         </pluginRepository>
     </pluginRepositories>
+
+    <dependencyManagement>
+        <dependencies>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>${hadoop.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-distcp</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        </dependencies>
+    </dependencyManagement> 
 
     <modules>
         <module>core</module>
