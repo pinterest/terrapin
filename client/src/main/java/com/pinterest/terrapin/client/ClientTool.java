@@ -37,14 +37,15 @@ import java.nio.ByteBuffer;
  *
  * mvn clean package -pl client -am
  * java -cp client/target/*:client/target/lib/* \
- *     -Dconfig={properties_file}               \
+ *     -Dterrapin.config={properties_file}               \
  *     com.pinterest.terrapin.client.ClientTool {fileset} {key}
  *
  * The zookeeper quorum and the cluster name are picked from the properties file.
  */
 public class ClientTool {
   public static void main(String[] args) throws Exception {
-    PropertiesConfiguration config = new PropertiesConfiguration(System.getProperty("config"));
+    PropertiesConfiguration config = new PropertiesConfiguration(
+        System.getProperty("terrapin.config"));
     TerrapinClient client = new TerrapinClient(config, 9090, 1000, 5000);
     String key = args[1];
     TerrapinSingleResponse response = client.getOne(args[0],  // fileset
