@@ -406,7 +406,12 @@ public class TerrapinUtil {
                                         int dfsReplication) {
     conf.setInt("mapred.map.max.attempts", Constants.MAPRED_MAP_MAX_ATTEMPTS);
     conf.setInt("io.bytes.per.checksum", Constants.CHECKSUM_BYTES);
-    conf.setLong("dfs.block.size", dfsBlockSize);
+    long dfsBlockSizeAdjusted = dfsBlockSize;
+    if (dfsBlockSize % Constants.CHECKSUM_BYTES != 0) {
+      dfsBlockSizeAdjusted =
+          (dfsBlockSize / Constants.CHECKSUM_BYTES + 1) * Constants.CHECKSUM_BYTES;
+    }
+    conf.setLong("dfs.block.size", dfsBlockSizeAdjusted);
     conf.setInt("dfs.replication", dfsReplication);
     conf.set(Constants.HFILE_COMPRESSION, System.getProperty(
             Constants.HFILE_COMPRESSION, Constants.HFILE_COMPRESSION_DEFAULT));

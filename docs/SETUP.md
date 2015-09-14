@@ -1,47 +1,53 @@
 # Cluster Setup
 
-A minimum of three parameters are required for a terrapin cluster:
-  - Cluster name (helix_cluster)
-  - The HDFS namenode (hdfs_namenode)
-  - Zookeeper quorum (zookeeper_quorum)
-
-Specify the above parameters through a properties file. A sample
+Terrapin runs on top of an existing HDFS cluster and requires a running ZooKeeper
+quorum for storing cluster state. Multiple terrapin clusters can share the same
+ZooKeeper quorum. A Terrapin cluster is configured through a properties file. A sample
 properties file is shown below:
 
 ```
+# ZooKeeper quorum for storing cluster state
 zookeeper_quorum=terrapintestzk:2181
+
+# HDFS namenode for backing HDFS cluster.
 hdfs_namenode=terrapintestnn
+
+# Name of the terrapin cluster.
 helix_cluster=test
 ```
 
-The cluster state is stored in the /test znode in zookeeper.
+Please make sure that the user running the Terrapin server process has access
+to perform short circuit local reads against HDFS. More details on setting up
+short circuit local reads can be found [here](http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-hdfs/ShortCircuitLocalReads.html). 
 
-## Deploying
+## Customizing your setup
 
-For each module (server/controller/client), a tar.gz file is built
-in the taThe TERRAPIN_HOME_DIR variable should point to this
-directory.file and the libraries under a lib/ folder.
-This file is generated as part of the maven assembly. The run scripts
-provided require a pointer to the directory containing the contents
-of this tar file. The TERRAPIN_HOME_DIR variable should point to this
-directory.
+Terrapin comes with sample run scripts and properties files which can
+be customized to your setup. Each run script ([run_controller_sample.sh],
+[run_server_sample.sh],[run_thrift_sample.sh]) contains environment variables
+which you may modify according to your setup. Its highly likely
+that you would need to modify the following variables:
+  - TERRAPIN_HOME_DIR: Directory containing extracted jars.
+  - TERRAPIN_CONFIG: Your cluster properties file
+  - GC_LOG_DIR: Directory for writing GC logs
+  - RUN_DIR: Directory for writing PID files
+
+Also, you will need to modify [log4j.controller.properties],
+[log4j.server.properties] and [log4j.thrift.properties] to point to
+the desired directories for the application logs for the controller,
+server and thrift server respectively. 
 
 ## Controller Setup
 
-Start the controller. This can be done on any node (preferably the
-namenode). A sample start stop script can be found [here](../controller/src/main/scripts/run_controller_sample.sh)
-You will need to make the following changes according to your setup:
-  - Modify TERRAPIN_HOME_DIR to point to the directory containing extracted jars
-  - Modify TERRAPIN_CONFIG to point to your properties file 
-  - Modify GC_LOG_DIR, RUN_DIR
-  - Modify logging directory in log4.controller.properties
+The controller can be setup on any node (preferably, run on the HDFS
+namenode). The sample start stop script can be found [here](../controller/src/main/scripts/run_controller_sample.sh)
 
 ```
 # Copy jars to controller (typically the namenode).
 rsync controller/target/terrapin-controller-0.1-SNAPSHOT-bin.tar.gz \
     $CONTROLLER_HOST:$TERRAPIN_HOME_DIR/
 ssh $CONTROLLER_HOST
-cd $TERRAPIN_BASE_DIR
+cd $TERRAPIN_HOME_DIR
 tar -xvzf terrapin-controller-0.1-SNAPSHOT-bin.tar.gz
 
 # Start the terrapin controller.
@@ -53,13 +59,8 @@ scripts/run_controller_sample.sh stop
 
 ## Server Setup
 
-Start the server on all data nodes. A sample start stop
+Start the server on all data nodes. The sample start stop
 script can be found [here](../server/src/main/scripts/run_server_sample.sh)
-You may need to make the following changes according to your setup:
-  - Modify TERRAPIN_HOME_DIR to point to the directory containing extracted jars
-  - Modify TERRAPIN_CONFIG to point to your properties file 
-  - Modify GC_LOG_DIR, RUN_DIR
-  - Modify logging directory in log4.server.properties
 
 ```
 # Copy jars to each datanode.
@@ -82,11 +83,10 @@ for instructions on how to upload and query data.
 ## Thrift Server Setup
 
 If you wish to access the data using a language other than java,
-you could start the terrapin thrift server. The thrift interface can
-be found at [TerrapinService.thrift](../core/src/main/thrift/TerrapinService.thrift). The thrift server is located
-in the client package. A thrift server can connect to multiple
-terrapin clusters on a single zookeeper quorum. The thrift server requires
-a properties file as below:
+you can start the terrapin thrift server. The thrift interface
+exposed by the thrift server can be found at [TerrapinService.thrift](../core/src/main/thrift/TerrapinService.thrift).
+A thrift server can connect to multiple terrapin clusters on a single zookeeper
+quorum. The thrift server requires a properties file as below:
 
 ```
 zookeeper_quorum=terrapintestnn:2181
@@ -96,12 +96,7 @@ cluster_list=test
 thrift_port=9010
 ```
 
-A sample start stop script can be found [here](../client/src/main/scripts/run_thrift_sample.sh).
-You may need to make the following changes according to your setup:
-  - Modify TERRAPIN_HOME_DIR to point to the directory containing extracted jars
-  - Modify TERRAPIN_CONFIG to point to your properties file 
-  - Modify GC_LOG_DIR, RUN_DIR
-  - Modify logging directory in log4.thrift.properties
+The sample start stop script can be found [here](../client/src/main/scripts/run_thrift_sample.sh).
 
 ```
 # Copy jars to thrift server node.
@@ -117,3 +112,13 @@ scripts/run_thrift_sample.sh start
 # Stop the terrapin thrift server.
 scripts/run_thrift_sample.sh stop
 ```
+
+[log4j.controller.properties]:../core/src/main/config/log4j.controller.properties
+[log4j.server.properties]:../core/src/main/config/log4j.server.properties
+[log4j.thrift.properties]:../core/src/main/config/log4j.thrift.properties
+[run_server_sample.sh]:../server/src/main/scripts/run_server_sample.sh
+[run_controller_sample.sh]:../controller/src/main/scripts/run_controller_sample.sh
+[run_thrift_sample.sh]:../client/src/main/scripts/run_thrift_sample.sh
+[log4j.controller.properties]:../core/src/main/config/log4j.controller.properties
+[log4j.server.properties]:../core/src/main/config/log4j.server.properties
+[log4j.thrift.properties]:../core/src/main/config/log4j.thrift.properties
