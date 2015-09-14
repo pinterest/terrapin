@@ -16,7 +16,6 @@
 */
 package com.pinterest.terrapin.controller;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.pinterest.terrapin.TerrapinUtil;
@@ -25,7 +24,6 @@ import com.pinterest.terrapin.thrift.generated.ControllerException;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.hdfs.DFSClient;
-import org.apache.hadoop.hdfs.protocol.DirectoryListing;
 import org.apache.hadoop.hdfs.protocol.HdfsFileStatus;
 import org.apache.helix.model.IdealState;
 import org.apache.helix.model.builder.CustomModeISBuilder;

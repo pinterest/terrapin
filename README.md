@@ -93,7 +93,7 @@ health.
 
 ##### Querying a Fileset
 
-Run the following command from the root of your git repo clone.
+Run the following command from the root of your git repo.
 
 ```
 java -cp client/target/*:client/target/lib/*        \

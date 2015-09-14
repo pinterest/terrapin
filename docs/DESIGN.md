@@ -97,5 +97,5 @@ right building blocks and saving precious engineering cycles.
 of operation and tight integration with MapReduce. 
   - We chose HFiles as the file format since we’ve had considerable success with
 HBase for online serving. It’s easy to consume and generate HFiles through Hadoop jobs.
-  - We use [Apache Helix](http://helix.apache.org) for ZooKeeper coordination.
+  - We use [Apache Helix](http://helix.apache.org) for ZooKeeper based cluster coordination.
 Apache Helix is used by many companies for managing stateful services.

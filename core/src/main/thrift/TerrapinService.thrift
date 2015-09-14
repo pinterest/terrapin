@@ -44,8 +44,8 @@ struct RequestOptions {
 
 struct TerrapinGetRequest {
   // The name of the clusters we are talking to. We allow multiple clusters
-  // if we have data replicated across multiple clusters. The failover
-  // functionality is not implemented yet.
+  // if we have data for the same fileset being loaded across multiple clusters.
+  // We do speculative execution based on the SelectionPolicy set in @options.
   1: required list<string> clusterList,
   2: required string fileSet,
   3: required binary key,
@@ -54,8 +54,8 @@ struct TerrapinGetRequest {
 
 struct TerrapinMultiGetRequest {
   // The name of the clusters we are talking to. We allow multiple clusters
-  // if we have data replicated across multiple clusters. The failover
-  // functionality is not implemented yet.
+  // if we have data for the same fileset being loaded across multiple clusters.
+  // We do speculative execution based on the SelectionPolicy set in @options.
   1: required list<string> clusterList,
   2: required string fileSet,
   3: required list<binary> keyList,

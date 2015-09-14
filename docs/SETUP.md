@@ -40,7 +40,7 @@ server and thrift server respectively.
 ## Controller Setup
 
 The controller can be setup on any node (preferably, run on the HDFS
-namenode). The sample start stop script can be found [here](../controller/src/main/scripts/run_controller_sample.sh)
+namenode). The sample start stop script can be found [here](../controller/src/main/scripts/run_controller_sample.sh).
 
 ```
 # Copy jars to controller (typically the namenode).
@@ -60,7 +60,7 @@ scripts/run_controller_sample.sh stop
 ## Server Setup
 
 Start the server on all data nodes. The sample start stop
-script can be found [here](../server/src/main/scripts/run_server_sample.sh)
+script can be found [here](../server/src/main/scripts/run_server_sample.sh).
 
 ```
 # Copy jars to each datanode.

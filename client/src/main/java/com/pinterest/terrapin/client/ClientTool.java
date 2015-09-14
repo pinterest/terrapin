@@ -16,17 +16,8 @@
 */
 package com.pinterest.terrapin.client;
 
-import com.google.common.collect.Lists;
-import com.pinterest.terrapin.thrift.generated.TerrapinGetRequest;
-import com.pinterest.terrapin.thrift.generated.TerrapinService;
 import com.pinterest.terrapin.thrift.generated.TerrapinSingleResponse;
-import com.twitter.finagle.Service;
-import com.twitter.finagle.builder.ClientBuilder;
-import com.twitter.finagle.thrift.ThriftClientFramedCodec;
-import com.twitter.finagle.thrift.ThriftClientRequest;
-import com.twitter.util.Duration;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.thrift.protocol.TBinaryProtocol;
 
 import java.nio.ByteBuffer;
 

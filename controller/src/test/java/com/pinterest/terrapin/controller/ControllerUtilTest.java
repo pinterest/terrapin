@@ -24,10 +24,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.pinterest.terrapin.Constants;
-import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.hdfs.DFSClient;

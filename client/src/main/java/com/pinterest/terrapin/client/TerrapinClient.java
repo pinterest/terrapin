@@ -25,7 +25,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.pinterest.terrapin.Constants;
 import com.pinterest.terrapin.TerrapinUtil;
-import com.pinterest.terrapin.base.BytesUtil;
 import com.pinterest.terrapin.thrift.generated.MultiKey;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 import com.pinterest.terrapin.thrift.generated.TerrapinGetErrorCode;
@@ -70,6 +69,8 @@ import java.util.concurrent.TimeUnit;
  * A client for communicating with the terrapin cluster. The client's job is to batch keys
  * by partitions within a resource and determining the right set of instances to issue the
  * requests against. It then collates the responses and returns back to the client.
+ *
+ * The public API(s) are getMany, getManyNoRetries, getOne and getOneNoRetries.
  *
  * TODO(varun): Add speculative execution for full shard failures. This would give us lower
  * latency.
@@ -166,10 +167,28 @@ public class TerrapinClient {
     });
   }
 
+  /**
+   * Issues multiple reads against a fileset but does not retry against replicas. Note
+   * that partial failures are communicated through an errorCode inside the map
+   * in the TerrapinResponse object.
+   *
+   * @param fileSet The file set to query.
+   * @param keyList The list of keys to query.
+   * @return a TerrapinResponse future.
+   */
   public Future<TerrapinResponse> getManyNoRetries(String fileSet, Set<ByteBuffer> keyList) {
     return getManyHelper(fileSet, keyList, false);
   }
 
+  /**
+   * Issues multiple reads against a fileset with retries against replicas. Note
+   * that partial failures are communicated through an errorCode inside the map
+   * in the TerrapinResponse object.
+   *
+   * @param fileSet The file set to query.
+   * @param keyList The list of keys to query.
+   * @return a TerrapinResponse future.
+   */
   public Future<TerrapinResponse> getMany(String fileSet, Set<ByteBuffer> keyList) {
     return getManyHelper(fileSet, keyList, true);
   }
@@ -207,7 +226,7 @@ public class TerrapinClient {
   }
 
   /**
-   * Get one API with retries.
+   * Get one API with retries against replicas.
    */
   public Future<TerrapinSingleResponse> getOne(String fileSet, ByteBuffer key) {
     return getMany(fileSet, Sets.newHashSet(key)).map(getManyToGetOneFunction(key));
