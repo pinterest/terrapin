@@ -19,6 +19,7 @@ package com.pinterest.terrapin.tools;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.pinterest.terrapin.PartitionerFactory;
+import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -143,7 +144,8 @@ public class HFileGenerator {
     StoreFile.Writer[] writers = new StoreFile.Writer[numOfPartitions];
     for (int i = 0; i < numOfPartitions; i++) {
       writers[i] = new StoreFile.WriterBuilder(conf, new CacheConfig(conf), sourceFileSystem, 4096)
-          .withFilePath(new Path(String.format("%s/part-%05d", outputFolder.getAbsoluteFile(), i)))
+          .withFilePath(new Path(String.format("%s/%s", outputFolder.getAbsoluteFile(),
+              TerrapinUtil.formatPartitionName(i))))
           .withCompression(Compression.Algorithm.NONE)
           .build();
     }

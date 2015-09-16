@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.pinterest.terrapin.Constants;
+import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 
 import com.google.common.collect.Sets;
@@ -56,7 +57,7 @@ public class ControllerUtilTest {
     HdfsFileStatus[] fileStatuses = new HdfsFileStatus[numPartitions];
     for (int i = 0; i < numPartitions; ++i) {
       fileStatuses[i] = PowerMockito.mock(HdfsFileStatus.class);
-      String localName = String.format("part-%05d", i);
+      String localName = TerrapinUtil.formatPartitionName(i);
       when(fileStatuses[i].getLocalName()).thenReturn(localName);
       when(fileStatuses[i].getFullName(eq(hdfsDir))).thenReturn(hdfsDir + "/" + localName);
       when(fileStatuses[i].getLen()).thenReturn(1000L);

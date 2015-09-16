@@ -71,16 +71,25 @@ public class TerrapinUtilTest {
   @Test
   public void testExtractPartitionName() {
     assertEquals(new Integer(10), TerrapinUtil.extractPartitionName(
-        "part-00010-ad2", PartitionerType.MODULUS));
+        Constants.FILE_PREFIX + "00010-ad2", PartitionerType.MODULUS));
     assertEquals(new Integer(10), TerrapinUtil.extractPartitionName(
-        "part-00010", PartitionerType.MODULUS));
-    Assert.assertNull(TerrapinUtil.extractPartitionName("part-929-ad2", PartitionerType.MODULUS));
+        Constants.FILE_PREFIX + "00010", PartitionerType.MODULUS));
+    Assert.assertNull(TerrapinUtil.extractPartitionName(Constants.FILE_PREFIX + "929-ad2",
+        PartitionerType.MODULUS));
 
     assertEquals(new Integer(10), TerrapinUtil.extractPartitionName(
-        "part-00010-ad2", PartitionerType.CASCADING));
+        Constants.FILE_PREFIX + "00010-ad2", PartitionerType.CASCADING));
     assertEquals(new Integer(10), TerrapinUtil.extractPartitionName(
-        "part-00010", PartitionerType.CASCADING));
-    Assert.assertNull(TerrapinUtil.extractPartitionName("part-929-ad2", PartitionerType.CASCADING));
+        Constants.FILE_PREFIX + "00010", PartitionerType.CASCADING));
+    Assert.assertNull(TerrapinUtil.extractPartitionName(Constants.FILE_PREFIX + "929-ad2",
+        PartitionerType.CASCADING));
+  }
+
+  @Test
+  public void testFormatPartitionName() {
+    assertEquals(Constants.FILE_PREFIX + "00000", TerrapinUtil.formatPartitionName(0));
+    assertEquals(Constants.FILE_PREFIX + "00010", TerrapinUtil.formatPartitionName(10));
+    assertEquals(Constants.FILE_PREFIX + "99999", TerrapinUtil.formatPartitionName(99999));
   }
 
   @Test
@@ -112,9 +121,9 @@ public class TerrapinUtilTest {
   @Test
   public void testExtractFileSetFromResource() {
     assertEquals("file_set", TerrapinUtil.extractFileSetFromPath(
-        "/terrapin/data/file_set/1343443323/part-00000"));
+        "/terrapin/data/file_set/1343443323/" + TerrapinUtil.formatPartitionName(0)));
     assertEquals("file_set", TerrapinUtil.extractFileSetFromPath(
-        "/file_set/1343443323/part-00000"));
+        "/file_set/1343443323/" + TerrapinUtil.formatPartitionName(0)));
     Assert.assertNull(TerrapinUtil.extractFileSetFromPath("/file_set/1343443323"));
     Assert.assertNull(TerrapinUtil.extractFileSetFromPath("/file_set"));
     Assert.assertNull(TerrapinUtil.extractFileSetFromPath("/file_set"));

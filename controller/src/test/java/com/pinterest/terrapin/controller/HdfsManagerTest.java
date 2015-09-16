@@ -259,7 +259,7 @@ public class HdfsManagerTest {
       for (int j = 1 ; j <= partitions; ++j) {
         resourceFsStatusList[j] = buildHdfsStatus(
                 TerrapinUtil.helixResourceToHdfsDir(resource) +
-            String.format("/part-%05d", j - 1), false, null);
+            String.format("/%s", TerrapinUtil.formatPartitionName(j - 1)), false, null);
       }
       when(mockDfsClient.listPaths(eq(TerrapinUtil.helixResourceToHdfsDir(resource)),
           any(byte[].class))). thenReturn(new DirectoryListing(resourceFsStatusList, 0));
@@ -272,7 +272,7 @@ public class HdfsManagerTest {
       throws IOException {
     for (Map.Entry<Integer, List<String>> entry : locationMap.entrySet()) {
       String path = TerrapinUtil.helixResourceToHdfsDir(resource) +
-          String.format("/part-%05d", entry.getKey());
+          String.format("/%s", TerrapinUtil.formatPartitionName(entry.getKey()));
       BlockLocation[] locations = new BlockLocation[1];
       String[] hostsArray = new String[entry.getValue().size()];
       entry.getValue().toArray(hostsArray);
@@ -338,14 +338,16 @@ public class HdfsManagerTest {
 
   private void checkHdfsBlocksNotRetrieved(String resource, int numPartitions) throws Exception {
     for (int i = 0; i < numPartitions; ++i) {
-      String path = TerrapinUtil.helixResourceToHdfsDir(resource) + String.format("/part-%05d", i);
+      String path = TerrapinUtil.helixResourceToHdfsDir(resource) +
+          String.format("/%s", TerrapinUtil.formatPartitionName(i));
       verify(mockDfsClient, times(0)).getBlockLocations(eq(path), eq(0L), anyLong());
     }
   }
 
   private void checkHdfsBlocksRetrieved(String resource, int numPartitions) throws Exception {
     for (int i = 0; i < numPartitions; ++i) {
-      String path = TerrapinUtil.helixResourceToHdfsDir(resource) + String.format("/part-%05d", i);
+      String path = TerrapinUtil.helixResourceToHdfsDir(resource) +
+          String.format("/%s", TerrapinUtil.formatPartitionName(i));
       verify(mockDfsClient, times(1)).getBlockLocations(eq(path), eq(0L), anyLong());
     }
   }

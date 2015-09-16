@@ -74,8 +74,7 @@ public class OnlineOfflineStateModelFactory extends StateModelFactory<StateModel
     // strip out the resource from partition name.
     String partitionNum = message.getPartitionName().substring(
         message.getResourceName().length() + 1);
-    String partitionName = "part-" + String.format("%05d",
-        Integer.parseInt(partitionNum));
+    String partitionName = TerrapinUtil.formatPartitionName(Integer.parseInt(partitionNum));
     String hdfsPath = TerrapinUtil.helixResourceToHdfsDir(message.getResourceName()) +
         "/" + partitionName;
 

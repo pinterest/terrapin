@@ -17,6 +17,8 @@
 package com.pinterest.terrapin.hadoop;
 
 import com.pinterest.terrapin.Constants;
+import com.pinterest.terrapin.TerrapinUtil;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -64,7 +66,7 @@ public class HFileOutputFormat extends FileOutputFormat<BytesWritable, BytesWrit
    * @return Full HFile path
    */
   public static Path hfilePath(Path outputPath, int partitionIndex) {
-    return new Path(outputPath, String.format("part-%05d", partitionIndex));
+    return new Path(outputPath, TerrapinUtil.formatPartitionName(partitionIndex));
   }
 
   public RecordWriter<BytesWritable, BytesWritable> getRecordWriter(
