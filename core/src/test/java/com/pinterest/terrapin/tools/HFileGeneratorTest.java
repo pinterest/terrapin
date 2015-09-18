@@ -18,6 +18,7 @@ package com.pinterest.terrapin.tools;
 
 import static org.junit.Assert.assertEquals;
 
+import com.pinterest.terrapin.Constants;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 
 import com.google.common.io.Files;
@@ -55,7 +56,7 @@ public class HFileGeneratorTest {
     FilenameFilter hfileFilter = new FilenameFilter() {
       @Override
       public boolean accept(File dir, String name) {
-        return name.startsWith("part-");
+        return name.startsWith(Constants.FILE_PREFIX);
       }
     };
     File[] hfiles = outputDir.listFiles(hfileFilter);

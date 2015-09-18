@@ -18,6 +18,8 @@ package com.pinterest.terrapin.hadoop;
 
 import static org.junit.Assert.assertEquals;
 
+import com.pinterest.terrapin.TerrapinUtil;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.io.hfile.Compression;
 import org.junit.Test;
@@ -36,7 +38,7 @@ public class HFileOutputFormatTest {
   public void testHFilePath() {
     Path outputDir = new Path("/abc/def");
     int partitionIndex = 233;
-    Path expectedDir = new Path("/abc/def/part-00233");
+    Path expectedDir = new Path("/abc/def/" + TerrapinUtil.formatPartitionName(233));
     assertEquals(expectedDir, HFileOutputFormat.hfilePath(outputDir, partitionIndex));
   }
 }

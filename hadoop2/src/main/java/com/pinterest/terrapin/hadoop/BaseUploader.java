@@ -203,6 +203,9 @@ public abstract class BaseUploader {
       for (Pair<Path, Long> fileSize : fileSizePairList) {
         sourceFiles.add(fileSize.getLeft());
       }
+      if (sourceFiles.size() == 1) {
+        hdfsDir = hdfsDir + "/" + TerrapinUtil.formatPartitionName(0);
+      }
       DistCpOptions distCpOptions = new DistCpOptions(sourceFiles,
           new Path("hdfs", terrapinNamenode, hdfsDir));
       distCpOptions.setSyncFolder(true);

@@ -16,6 +16,7 @@
 */
 package com.pinterest.terrapin.server;
 
+import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.storage.Reader;
 import com.pinterest.terrapin.storage.ReaderFactory;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -67,7 +68,8 @@ public class OnlineOfflineStateModelFactoryTest {
     this.stateModel.onBecomeOnlineFromOffline(mockHelixMessage, null);
     verify(mockResourcePartitionMap).addReader(
         eq("$terrapin$data$file_set$1393"), eq("100"), Matchers.<Reader>anyObject());
-    verify(mockReaderFactory).createHFileReader(eq("/terrapin/data/file_set/1393/part-00100"),
+    verify(mockReaderFactory).createHFileReader(eq("/terrapin/data/file_set/1393/" +
+            TerrapinUtil.formatPartitionName(100)),
         Matchers.<CacheConfig>anyObject());
   }
 
@@ -79,7 +81,8 @@ public class OnlineOfflineStateModelFactoryTest {
     this.stateModel.onBecomeOnlineFromOffline(mockHelixMessage, null);
     verify(mockResourcePartitionMap).addReader(
         eq("$terrapin$data$file_set$1393"), eq("100"), Matchers.<Reader>anyObject());
-    verify(mockReaderFactory).createHFileReader(eq("/terrapin/data/file_set/1393/part-00100"),
+    verify(mockReaderFactory).createHFileReader(eq("/terrapin/data/file_set/1393/" +
+        TerrapinUtil.formatPartitionName(100)),
         Matchers.<CacheConfig>anyObject());
   }
 

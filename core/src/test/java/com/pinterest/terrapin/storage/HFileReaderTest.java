@@ -49,6 +49,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import com.pinterest.terrapin.TerrapinUtil;
+
 /**
  * Unit test for HFileReader. The test creates an HFile with upto 10K keys on the local file system.
  * It then instantiates an HFileReader over the local file system to issue HFile lookups and
@@ -200,7 +202,8 @@ public class HFileReaderTest {
 
   @Test
   public void testTerrapinPath() {
-    Path path = new HFileReader.TerrapinPath("/terrapin/data/meta_user_join/1234/part-00000");
-    assertEquals("part-00000_meta_user_join_1234", path.getName());
+    String partName = TerrapinUtil.formatPartitionName(0);
+    Path path = new HFileReader.TerrapinPath("/terrapin/data/meta_user_join/1234/" + partName);
+    assertEquals(partName + "_meta_user_join_1234", path.getName());
   }
 }

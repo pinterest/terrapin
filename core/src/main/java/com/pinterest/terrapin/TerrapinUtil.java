@@ -122,6 +122,10 @@ public class TerrapinUtil {
     return null;
   }
 
+  public static String formatPartitionName(int partitionNumber) {
+    return String.format("%s%05d", Constants.FILE_PREFIX, partitionNumber);
+  }
+
   public static String getPartitionName(ByteBuffer key,
                                         PartitionerType partitionerType,
                                         int numPartitions) {
