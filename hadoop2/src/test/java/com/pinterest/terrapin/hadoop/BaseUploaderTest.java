@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.pinterest.terrapin.Constants;
+import com.pinterest.terrapin.TerrapinUtil;
 import com.pinterest.terrapin.thrift.generated.Options;
 import com.pinterest.terrapin.thrift.generated.PartitionerType;
 import com.pinterest.terrapin.tools.HFileGenerator;
@@ -60,7 +61,6 @@ import java.util.List;
 
 public class BaseUploaderTest {
 
-  private final static int NUM_PART = 100;
   private final static String CLUSTER = "test_cluster";
   private final static String NAME_NODE = "test_node";
   private final static int REPLICA_FACTOR = 2;
@@ -73,14 +73,16 @@ public class BaseUploaderTest {
     private ZooKeeperManager zkManager;
     private DistCp distCp;
     private Job job;
+    private int numPartition;
 
     public TestUploader(TerrapinUploaderOptions options) {
       super(options);
     }
 
-    public void init() throws Exception {
+    public void init(int numPartition) throws Exception {
+      this.numPartition = numPartition;
       sourceFiles = HFileGenerator.generateHFiles(fs, conf, tempFolder,
-          options.loadOptions.getPartitioner(), NUM_PART, NUM_PART * 1000);
+          options.loadOptions.getPartitioner(), numPartition, numPartition * 1000);
       blockSize = 0;
       for (Path path : sourceFiles) {
         long fileSize = new File(path.toString()).length();
@@ -144,8 +146,11 @@ public class BaseUploaderTest {
       assertEquals(sourceFiles, options.getSourcePaths());
       assertTrue(options.shouldSkipCRC());
       assertTrue(options.shouldSyncFolder());
-      assertTrue(options.getTargetPath().toString()
-          .startsWith("hdfs://" + NAME_NODE + HDFS_DIR));
+      assertTrue(options.getTargetPath().toString().startsWith("hdfs://" + NAME_NODE + HDFS_DIR));
+      if (numPartition == 1) {
+        assertTrue(options.getTargetPath().toString()
+            .endsWith(TerrapinUtil.formatPartitionName(0)));
+      }
       return distCp;
     }
 
@@ -153,7 +158,7 @@ public class BaseUploaderTest {
     protected void loadFileSetData(ZooKeeperManager zkManager, FileSetInfo fileSetInfo,
                                    Options options) {
       assertEquals(FILE_SET, fileSetInfo.fileSetName);
-      assertEquals(NUM_PART, fileSetInfo.servingInfo.numPartitions);
+      assertEquals(numPartition, fileSetInfo.servingInfo.numPartitions);
     }
   }
 
@@ -215,7 +220,14 @@ public class BaseUploaderTest {
 
   @Test
   public void testUpload() throws Exception {
-    uploader.init();
+    uploader.init(100);
+    uploader.upload(CLUSTER, FILE_SET, new Options());
+    uploader.verifyTest();
+  }
+
+  @Test
+  public void testUploadOneFile() throws Exception {
+    uploader.init(1);
     uploader.upload(CLUSTER, FILE_SET, new Options());
     uploader.verifyTest();
   }
