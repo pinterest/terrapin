@@ -1,3 +1,7 @@
+**Note:** This project is no longer actively maintained by Pinterest.
+
+---
+
 # Terrapin: Serving system for Hadoop generated data
 
 Terrapin is a low latency serving system providing random
